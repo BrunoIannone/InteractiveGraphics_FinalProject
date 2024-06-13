@@ -1,0 +1,268 @@
+<doctype html>
+<!-- Copyright 2020, Cem Yuksel, University of Utah -->
+<html>
+<head>
+<title>BeyBlade Simulation</title>
+<link rel="stylesheet" href="Style/index.css">
+
+<script type="text/javascript" id="includedscript" src="project7.js"></script>
+<script type="text/javascript" src="obj.js"></script>
+
+<!--Script for drawing the arena -->
+<script type="text/javascript" src="Arena/arena.js"></script>
+
+<!--Script for drawing the white cube -->
+<script type="text/javascript" src="Cube/vertex_selection_color.js"></script>
+
+<!--Script for WebGl initialization -->
+<script type="text/javascript" src="WebGl/init.js"></script>
+
+<!--Script for matrix utils function -->
+<script type="text/javascript" src="Matrix_Utils/matrix_utils.js"></script>
+
+<!-- Light script -->
+<script type="text/javascript" src="Light/light.js"></script>
+<script type="text/javascript" src="Vec3/vec3.js"></script>
+
+<script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
+
+<script type="text/javascript">
+///////////////////////////////////////////////////////////////////////////////////
+// Below are the main UI control functions.
+///////////////////////////////////////////////////////////////////////////////////
+
+var showBox;
+
+window.onload = function() {
+	showBox = document.getElementById('show-box');
+	InitWebGL();
+	lightView = new LightView();
+	canvas.zoom = function( s ) {
+		transZ *= s/canvas.height + 1;
+		UpdateViewMatrices();
+		DrawScene();
+	}
+	canvas.onwheel = function() { canvas.zoom(0.3*event.deltaY); }
+	canvas.onmousedown = function() {
+		if ( massSpring.mouseDown() ) {
+			canvas.ondblclick = null;
+			return;
+		}
+		canvas.ondblclick = canvas.resetView;
+		var cx = event.clientX;
+		var cy = event.clientY;
+		if ( event.ctrlKey ) {
+			canvas.onmousemove = function() {
+				canvas.zoom(5*(event.clientY - cy));
+				cy = event.clientY;
+			}
+		} else if ( event.altKey ) {
+			canvas.onmousemove = function() {
+				let s = 1.5*transZ*(event.clientY - cy);
+				transY -= s/canvas.height;
+				UpdateViewMatrices();
+				DrawScene();
+				cy = event.clientY;
+			}
+		} else {
+			canvas.onmousemove = function() {
+				rotY += (cx - event.clientX)/canvas.width*5;
+				rotX += (cy - event.clientY)/canvas.height*5;
+				cx = event.clientX;
+				cy = event.clientY;
+				UpdateViewMatrices();
+				DrawScene();
+			}
+		}
+	}
+	canvas.onmouseup = canvas.onmouseleave = function() {
+		massSpring.mouseUp();
+		canvas.onmousemove = function() { massSpring.mouseMove(); }
+	}
+	canvas.onmousemove = function() { massSpring.mouseMove(); }
+	canvas.resetView = function() {
+		rotX = 0;
+		rotY = 0;
+		transY = 0;
+		transZ = 3;
+		UpdateViewMatrices();
+		DrawScene();
+	}
+	
+	massSpring = new MassSpring();
+	
+	SetGravity  ( document.getElementById('gravity') );
+	SetMass     ( document.getElementById('mass') );
+	SetStiffness( document.getElementById('stiffness') );
+	SetShininess( document.getElementById('shininess-exp') );
+
+	DrawScene();
+};
+function WindowResize()
+{
+	UpdateCanvasSize();
+	DrawScene();
+}
+
+function MousePos()
+{
+	return {
+		x:  ( event.clientX / canvas.clientWidth  ) * 2 - 1,
+		y: -( event.clientY / canvas.clientHeight ) * 2 + 1
+	};
+}
+
+function ShowTexture( param )
+{
+	meshDrawer.showTexture( param.checked );
+	DrawScene();
+}
+
+function LoadObj( param )
+{
+	if ( param.files && param.files[0] ) {
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			massSpring.setMesh( e.target.result );
+		}
+		reader.readAsText( param.files[0] );
+	}
+}
+
+function LoadTexture( param )
+{
+	if ( param.files && param.files[0] ) {
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			var img = document.getElementById('texture-img');
+			img.onload = function() {
+				meshDrawer.setTexture( img );
+				DrawScene();
+			}
+			img.src = e.target.result;
+		};
+		reader.readAsDataURL( param.files[0] );
+	}
+}
+
+function SetTimeStepSize( param )
+{
+	var s = param.value;
+	document.getElementById('timestep-value').innerText = s + " ms";
+}
+
+function SetGravity( param )
+{
+	var v = param.value;
+	var s = v / 20;
+	document.getElementById('gravity-value').innerText = s.toFixed( 2 );
+	massSpring.gravity.y = -s;
+}
+
+function SetMass( param )
+{
+	var v = param.value;
+	var s = v / 200;
+	document.getElementById('mass-value').innerText = s.toFixed( 3 );
+	massSpring.mass = s;
+}
+
+function SetStiffness( param )
+{
+	var v = param.value;
+	var s = v / 20;
+	document.getElementById('stiffness-value').innerText = s.toFixed( 2 );
+	massSpring.stiffness = s;
+}
+
+function SetDamping( param )
+{
+	var v = param.value;
+	var s = v / 20;
+	document.getElementById('damping-value').innerText = s.toFixed( 2 );
+	massSpring.damping = s;
+}
+
+function SetShininess( param )
+{
+	var exp = param.value;
+	var s = Math.pow(10,exp/25);
+	document.getElementById('shininess-value').innerText = s.toFixed( s < 10 ? 2 : 0 );
+	meshDrawer.setShininess(s);
+	DrawScene();
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+</script>
+
+<script id="box.obj" type="text/obj">
+v  -1  1 -1
+v  -1 -1 -1
+v   1 -1 -1
+v   1  1 -1
+v   1 -1  1
+v  -1 -1  1
+v  -1  1  1
+v   1  1  1
+vn  0  0  1
+vn  0  0  1
+vn  0  0  1
+vn  0  0  1
+vn  0  0 -1
+vn  0  0 -1
+vn  0  0 -1
+vn  0  0 -1
+vn  0  1  0
+vn  0  1  0
+vn  0  1  0
+vn  0  1  0
+vn -1  0  0
+vn -1  0  0
+vn -1  0  0
+vn -1  0  0
+vn  0 -1  0
+vn  0 -1  0
+vn  0 -1  0
+vn  0 -1  0
+vn  1  0  0
+vn  1  0  0
+vn  1  0  0
+vn  1  0  0
+vt 0 0
+vt 0 1
+vt 1 1
+vt 1 0
+f 1/1/1  4/4/4  3/3/3  2/2/2  
+f 5/1/5  8/4/8  7/3/7  6/2/6  
+f 3/1/9  5/4/12 6/3/11 2/2/10 
+f 4/1/13 8/4/16 5/3/15 3/2/14 
+f 1/1/17 7/4/20 8/3/19 4/2/18 
+f 2/1/21 6/4/24 7/3/23 1/2/22 
+</script>
+
+</head>
+<body onresize="WindowResize()">
+<div id="canvas-div"><canvas id="canvas"></canvas></div><div id="controls-div">
+<div id="controls">
+<div class="control-group"><canvas id="lightcontrol"></canvas><div id="lightcontrol-label">Light Direction</div></div>
+<div class="control-group">
+<div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this)"></div>
+<div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()"></div>
+<div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
+<div class="control"><span id="gravity-label">Gravity:</span><span class="value" id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20" oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()"/></div>
+<div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
+<div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
+<div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>
+</div>
+<div class="control-group">
+<div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()" checked /><label for="show-box"> Show Box</label></div>
+<div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)" checked /><label for="show-texture"> Show Texture</label></div>
+<div class="control"><span id="shininess-label">Shininess:</span><span class="value" id="shininess-value">1</span><input id="shininess-exp" type="range" min="0" max="100" value="50" oninput="SetShininess(this)" ondblclick="this.value=50;this.oninput()"/></div>
+<div class="control">OBJ model:<br/><input id="obj" type="file" onchange="LoadObj(this)" accept=".obj"/></div>
+<div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
+<div class="control"><img id="texture-img" /></div>
+</div>
+</div>
+</div>
+</body>
+</html>
