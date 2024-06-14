@@ -79,13 +79,15 @@ function DrawScene()
 	// Draw the curve and then the line segments that connect the control points.
 	var nrmTrans = [ MV[0],MV[1],MV[2], MV[4],MV[5],MV[6], MV[8],MV[9],MV[10] ];
 	for (var i = 0; i<drawers.length; i++){
-		console.log(i)
+		//console.log(i)
 		drawers[i].draw( MVP, MV, nrmTrans );
+		pdrawer[i].draw( MVP);
+
 	}
 	if ( showBox.checked ) {
 		boxDrawer.draw( MVP );
 	}
-	pointDrawer.draw( MVP );
+	//pointDrawer.draw( MVP );
 }
 
 // This is a helper function for compiling the given vertex and fragment shader source code into a program.

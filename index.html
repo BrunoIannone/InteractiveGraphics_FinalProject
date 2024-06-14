@@ -33,6 +33,7 @@
 
 var showBox;
 var drawers = new Array();
+var pdrawer = new Array();
 window.onload = function() {
 	showBox = document.getElementById('show-box');
 	InitWebGL();
@@ -44,7 +45,7 @@ window.onload = function() {
 	}
 	canvas.onwheel = function() { canvas.zoom(0.3*event.deltaY); }
 	canvas.onmousedown = function() {
-		if ( massSpring.mouseDown() ) {
+		if ( massSpring.mouseDown() || massSpring2.mouseDown() ) {
 			canvas.ondblclick = null;
 			return;
 		}
@@ -77,9 +78,11 @@ window.onload = function() {
 	}
 	canvas.onmouseup = canvas.onmouseleave = function() {
 		massSpring.mouseUp();
-		canvas.onmousemove = function() { massSpring.mouseMove(); }
+		massSpring2.mouseUp();
+
+		canvas.onmousemove = function() { massSpring.mouseMove(); massSpring2.mouseMove();}
 	}
-	canvas.onmousemove = function() { massSpring.mouseMove(); }
+	canvas.onmousemove = function() { massSpring.mouseMove();massSpring2.mouseMove(); }
 	canvas.resetView = function() {
 		rotX = 0;
 		rotY = 0;
@@ -89,10 +92,14 @@ window.onload = function() {
 		DrawScene();
 	}
 	
-	massSpring = new MassSpring(true);
+	massSpring = new MassSpring(true,"1");
 	drawers.push(massSpring.meshDrawer);
-	massSpring2 = new MassSpring(true);
+	pdrawer.push(massSpring.pointDrawer);
+
+	massSpring2 = new MassSpring(true,"2");
 	drawers.push(massSpring2.meshDrawer);
+	pdrawer.push(massSpring2.pointDrawer);
+
 	
 	SetGravity  ( document.getElementById('gravity') );
 	SetMass     ( document.getElementById('mass') );
@@ -127,6 +134,7 @@ function LoadObj( param )
 		var reader = new FileReader();
 		reader.onload = function(e) {
 			massSpring.setMesh( e.target.result );
+			massSpring2.setMesh( e.target.result );
 		}
 		reader.readAsText( param.files[0] );
 	}
@@ -160,6 +168,7 @@ function SetGravity( param )
 	var s = v / 20;
 	document.getElementById('gravity-value').innerText = s.toFixed( 2 );
 	massSpring.gravity.y = -s;
+	massSpring2.gravity.y = -s;
 }
 
 function SetMass( param )
@@ -168,6 +177,8 @@ function SetMass( param )
 	var s = v / 200;
 	document.getElementById('mass-value').innerText = s.toFixed( 3 );
 	massSpring.mass = s;
+	massSpring2.mass = s;
+
 }
 
 function SetStiffness( param )
@@ -176,6 +187,8 @@ function SetStiffness( param )
 	var s = v / 20;
 	document.getElementById('stiffness-value').innerText = s.toFixed( 2 );
 	massSpring.stiffness = s;
+	massSpring2.stiffness = s;
+
 }
 
 function SetDamping( param )
@@ -184,6 +197,8 @@ function SetDamping( param )
 	var s = v / 20;
 	document.getElementById('damping-value').innerText = s.toFixed( 2 );
 	massSpring.damping = s;
+	massSpring2.damping = s;
+
 }
 
 function SetShininess( param )
@@ -249,9 +264,9 @@ f 2/1/21 6/4/24 7/3/23 1/2/22
 <div id="controls">
 <div class="control-group"><canvas id="lightcontrol"></canvas><div id="lightcontrol-label">Light Direction</div></div>
 <div class="control-group">
-<div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this)"></div>
-<div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()"></div>
-<div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
+<div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this); massSpring2.toggleSimulation(this)"></div>
+<div class="control"><input type="button" value="Reset" onclick="massSpring.reset();massSpring2.reset();DrawScene()"></div>
+<div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation();massSpring2.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
 <div class="control"><span id="gravity-label">Gravity:</span><span class="value" id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20" oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()"/></div>
 <div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
 <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>

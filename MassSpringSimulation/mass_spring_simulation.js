@@ -1,19 +1,22 @@
-var massSpring;
+//var massSpring;
 
 
 
 class MassSpring {
 
-	constructor(random)
+	constructor(random,label)
 	{
+		this.label = label;
+		this.random = random;
+
 		this.gravity = new Vec3( 0, -2.0, 0 );
 		this.mass = .1;
 		this.stiffness = 1;
 		this.damping = 1;
 		this.restitution = .8;
-		this.random = random;
 		this.meshDrawer = new MeshDrawer();
 		this.setMesh( document.getElementById('box.obj').text );
+		this.pointDrawer = new PointDrawer();
 	}
 	setMesh( objdef )
 	{
@@ -124,7 +127,7 @@ class MassSpring {
 		// Update the mesh drawer and redraw scene
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
 
-		pointDrawer.updatePoint();
+		this.pointDrawer.updatePoint();
 		DrawScene();
 	}
 
@@ -150,7 +153,7 @@ class MassSpring {
 	startSimulation()
 	{
 		var timestep = document.getElementById('timestep').value;
-		if ( ! this.isSimulationRunning() ) this.timer = setInterval( function(){ massSpring.simTimeStep(); }, timestep );
+		if ( ! this.isSimulationRunning() ) this.timer = setInterval(() => { this.simTimeStep(); }, timestep);
 	}
 	stopSimulation()
 	{
@@ -165,6 +168,7 @@ class MassSpring {
 			this.stopSimulation();
 			btn.value = "Start Simulation";
 		} else {
+			console.log(this.label)
 			this.startSimulation();
 			btn.value = "Stop Simulation";
 		}
@@ -190,7 +194,7 @@ class MassSpring {
 				selPt = p;
 			}
 		}
-		if ( pointDrawer.setPoint( selPt ) ) {
+		if ( this.pointDrawer.setPoint( selPt ) ) {
 			DrawScene();
 			canvas.className = selPt ? "sel" : "";
 		}
