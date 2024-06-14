@@ -4,13 +4,15 @@ var massSpring;
 
 class MassSpring {
 
-	constructor()
+	constructor(random)
 	{
 		this.gravity = new Vec3( 0, -2.0, 0 );
 		this.mass = .1;
 		this.stiffness = 1;
 		this.damping = 1;
 		this.restitution = .8;
+		this.random = random;
+		this.meshDrawer = new MeshDrawer();
 		this.setMesh( document.getElementById('box.obj').text );
 	}
 	setMesh( objdef )
@@ -28,6 +30,13 @@ class MassSpring {
 			(box.max[1]-box.min[1])/2,
 			(box.max[2]-box.min[2])/2
 		];
+		if(this.random){
+			shift = [
+				(Math.random() * 2 - 1),
+				(Math.random() * 2 - 1),
+				(Math.random() * 2 - 1)
+			];
+		}
 		var maxSize = Math.max( size[0], size[1], size[2] );
 		var scale = 0.4/maxSize;
 		this.mesh.shiftAndScale( shift, scale );
@@ -58,7 +67,7 @@ class MassSpring {
 		this.nrm = Array( this.mesh.norm.length );
 		for ( var i=0; i<this.nrm.length; ++i ) this.nrm[i] = ToVec3( this.mesh.norm[i] );
 		this.buffers = this.mesh.getVertexBuffers();
-		meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
 	}
 
 	updateMesh()
@@ -113,7 +122,7 @@ class MassSpring {
 		updateBuffer( this.buffers.normalBuffer, this.mesh.nfac, this.nrm );
 
 		// Update the mesh drawer and redraw scene
-		meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
 
 		pointDrawer.updatePoint();
 		DrawScene();

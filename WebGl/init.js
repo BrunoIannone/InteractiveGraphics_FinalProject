@@ -78,7 +78,10 @@ function DrawScene()
 	
 	// Draw the curve and then the line segments that connect the control points.
 	var nrmTrans = [ MV[0],MV[1],MV[2], MV[4],MV[5],MV[6], MV[8],MV[9],MV[10] ];
-	meshDrawer.draw( MVP, MV, nrmTrans );
+	for (var i = 0; i<drawers.length; i++){
+		console.log(i)
+		drawers[i].draw( MVP, MV, nrmTrans );
+	}
 	if ( showBox.checked ) {
 		boxDrawer.draw( MVP );
 	}

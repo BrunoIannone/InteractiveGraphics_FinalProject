@@ -32,7 +32,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 var showBox;
-
+var drawers = new Array();
 window.onload = function() {
 	showBox = document.getElementById('show-box');
 	InitWebGL();
@@ -89,7 +89,10 @@ window.onload = function() {
 		DrawScene();
 	}
 	
-	massSpring = new MassSpring();
+	massSpring = new MassSpring(true);
+	drawers.push(massSpring.meshDrawer);
+	massSpring2 = new MassSpring(true);
+	drawers.push(massSpring2.meshDrawer);
 	
 	SetGravity  ( document.getElementById('gravity') );
 	SetMass     ( document.getElementById('mass') );
