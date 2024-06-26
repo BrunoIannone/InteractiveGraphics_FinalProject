@@ -17,6 +17,7 @@ class MassSpring {
 		this.meshDrawer = new MeshDrawer();
 		this.setMesh( document.getElementById('box.obj').text );
 		this.pointDrawer = new PointDrawer();
+		this.lightView = new LightView(this.meshDrawer);
 	}
 	setMesh( objdef )
 	{

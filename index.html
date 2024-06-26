@@ -34,10 +34,11 @@
 var showBox;
 var drawers = new Array();
 var pdrawer = new Array();
+var massSpring, massSpring2;
 window.onload = function() {
 	showBox = document.getElementById('show-box');
 	InitWebGL();
-	lightView = new LightView();
+	lightView = new LightView(drawers);
 	canvas.zoom = function( s ) {
 		transZ *= s/canvas.height + 1;
 		UpdateViewMatrices();

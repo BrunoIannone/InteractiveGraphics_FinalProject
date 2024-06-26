@@ -32,7 +32,7 @@ class MeshDrawer
 		// [TO-DO] initializations
 		// Compile the shader program
 		this.prog = InitShaderProgram(MeshVS, MeshFS);
-
+		console.log(["MESH",this.prog]);
 		// Get the ids of the uniform variables in the shaders. In this case, the transformation matrix named "mvp","mv","mn"
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 		this.mv = gl.getUniformLocation(this.prog, 'mv');

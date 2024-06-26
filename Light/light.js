@@ -1,9 +1,10 @@
-var lightView;
+//var lightView;
 
 class LightView
 {
-	constructor()
+	constructor(drawa)
 	{
+		this.drawa = drawa;
 		this.canvas = document.getElementById("lightcontrol");
 		this.canvas.oncontextmenu = function() {return false;};
 		this.gl = this.canvas.getContext("webgl", {antialias: false, depth: true});	// Initialize the GL context
@@ -86,6 +87,7 @@ class LightView
 		
 		// Compile the shader program
 		this.prog = InitShaderProgram( lightViewVS, lightViewFS, this.gl );
+		console.log(["LIGHT",this.prog]);
 		this.mvp = this.gl.getUniformLocation( this.prog, 'mvp' );
 		this.clr1 = this.gl.getUniformLocation( this.prog, 'clr1' );
 		this.clr2 = this.gl.getUniformLocation( this.prog, 'clr2' );
@@ -94,21 +96,23 @@ class LightView
 		this.draw();
 		this.updateLightDir();
 		
-		this.canvas.onmousedown = function() {
+		this.canvas.onmousedown = (event) => {
 			var cx = event.clientX;
 			var cy = event.clientY;
-			lightView.canvas.onmousemove = function() {
-				lightView.rotY += (cx - event.clientX)/lightView.canvas.width*5;
-				lightView.rotX += (cy - event.clientY)/lightView.canvas.height*5;
+			this.canvas.onmousemove = (event) => {
+				this.rotY += (cx - event.clientX) / this.canvas.width * 5;
+				this.rotX += (cy - event.clientY) / this.canvas.height * 5;
 				cx = event.clientX;
 				cy = event.clientY;
-				lightView.draw();
-				lightView.updateLightDir();
+				this.draw();
+				this.updateLightDir();
 			}
-		}
-		this.canvas.onmouseup = this.canvas.onmouseleave = function() {
-			lightView.canvas.onmousemove = null;
-		}
+		};
+		
+		this.canvas.onmouseup = this.canvas.onmouseleave = () => {
+			this.canvas.onmousemove = null;
+		};
+		
 	}
 	
 	updateLightDir()
@@ -117,11 +121,15 @@ class LightView
 		var sy = Math.sin( this.rotY );
 		var cx = Math.cos( this.rotX );
 		var sx = Math.sin( this.rotX );
-		meshDrawer.setLightDir( -sy, cy*sx, -cy*cx );
-		DrawScene();
+		//console.log(sx);
+		for(var i=0; i< this.drawa.length; i++){
+			this.drawa[i].setLightDir( -sy, cy*sx, -cy*cx );
+			DrawScene();
+
+		}
 	}
 	
-	draw()
+	draw()//disegna icona light direction
 	{
 		// Clear the screen and the depth buffer.
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
