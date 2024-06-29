@@ -25,7 +25,86 @@
 <script type="text/javascript" src="Vec3/vec3.js"></script>
 
 <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
+<!--SHADER -->
+<script id="raytraceVS" type="x-shader/x-vertex">
+	attribute vec3 p;
+	uniform mat4 proj;
+	uniform mat4 c2w; //camera to world
+	varying vec3 ray_pos;
+	varying vec3 ray_dir;
+	void main()
+	{
+		gl_Position = proj * vec4(p,1);
+		vec4 rp = c2w * vec4(0,0,0,1);
+		ray_pos = rp.xyz;
+		vec4 rd = c2w * vec4(p,1);
+		ray_dir = rd.xyz - ray_pos;
+	}
+</script>
 
+<script id="envFS" type="x-shader/x-fragment">
+	precision mediump float;
+	varying vec3 ray_dir;
+	uniform samplerCube envMap;
+	void main()
+	{
+		gl_FragColor = textureCube( envMap, ray_dir.xzy );
+	}
+</script>
+<!-- -- -->
+<script>
+	var viewRotX = 0, viewRotZ = 0, transZ = 3;
+	const transZmin = 1.001;
+	const transZmax = 10;
+	var canvas, gl;
+	var environmentTexture;
+	var screenQuad = {
+		init(fov, z) {
+			if (!this.vbuf) this.vbuf = gl.createBuffer();
+			const r = canvas.width / canvas.height;
+			const ff = Math.PI * fov / 180;
+			const tant_2 = Math.tan(ff / 2);
+			const y = z * tant_2;
+			const x = y * r;
+			const rtp = [
+				-x, -y, -z,
+				x, -y, -z,
+				x, y, -z,
+				-x, -y, -z,
+				x, y, -z,
+				-x, y, -z,
+			];
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vbuf);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(rtp), gl.STATIC_DRAW);
+		},
+		draw(prog, trans) {
+			gl.useProgram(prog);
+			gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'c2w'), false, trans.camToWorld);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vbuf);
+			var p = gl.getAttribLocation(prog, 'p');
+			gl.vertexAttribPointer(p, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(p);
+			gl.drawArrays(gl.TRIANGLES, 0, 6);
+		}
+	};
+
+	var background = {
+		init() {
+			this.prog = InitShaderProgramFromScripts('raytraceVS', 'envFS');
+		},
+		updateProj() {
+			gl.useProgram(this.prog);
+			gl.uniformMatrix4fv(gl.getUniformLocation(this.prog, 'proj'), false, perspectiveMatrix);
+		},
+		draw(trans) {
+			gl.depthMask(true);
+			screenQuad.draw(this.prog, trans);
+			gl.depthMask(true);
+		}
+	};
+
+</script>
+<!-- --------- -->
 <script type="text/javascript">
 ///////////////////////////////////////////////////////////////////////////////////
 // Below are the main UI control functions.
@@ -42,6 +121,7 @@ window.onload = function() {
 	canvas.zoom = function( s ) {
 		transZ *= s/canvas.height + 1;
 		UpdateViewMatrices();
+		//UpdateProjectionMatrix();
 		DrawScene();
 	}
 	canvas.onwheel = function() { canvas.zoom(0.3*event.deltaY); }
@@ -63,6 +143,7 @@ window.onload = function() {
 				let s = 1.5*transZ*(event.clientY - cy);
 				transY -= s/canvas.height;
 				UpdateViewMatrices();
+				//UpdateProjectionMatrix();
 				DrawScene();
 				cy = event.clientY;
 			}
@@ -73,6 +154,7 @@ window.onload = function() {
 				cx = event.clientX;
 				cy = event.clientY;
 				UpdateViewMatrices();
+				//UpdateProjectionMatrix();
 				DrawScene();
 			}
 		}
@@ -114,7 +196,10 @@ function WindowResize()
 	UpdateCanvasSize();
 	DrawScene();
 }
-
+function UseEnvironmentMap(param) {
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
+                DrawScene();
+            }
 function MousePos()
 {
 	return {
@@ -280,6 +365,10 @@ f 2/1/21 6/4/24 7/3/23 1/2/22
 <div class="control">OBJ model:<br/><input id="obj" type="file" onchange="LoadObj(this)" accept=".obj"/></div>
 <div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
 <div class="control"><img id="texture-img" /></div>
+<div class="control"><input id="envmap" name="envmap" type="checkbox" onchange="UseEnvironmentMap(this)"
+	checked /><label for="envmap"> Environment Map</label></div>
+
+</div>
 </div>
 </div>
 </div>

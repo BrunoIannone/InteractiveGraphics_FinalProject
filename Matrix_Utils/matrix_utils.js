@@ -75,3 +75,48 @@ function MatrixInverse( m )
 	
 	return r;
 }
+function GetTrans()
+{
+	function dot(a,b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+
+	var cz = Math.cos( viewRotZ );
+	var sz = Math.sin( viewRotZ );
+	var cx = Math.cos( viewRotX );
+	var sx = Math.sin( viewRotX );
+
+	var z = [ cx*sz, -cx*cz, sx ];
+	var c = [ z[0]*transZ, z[1]*transZ, z[2]*transZ ];	
+	var xlen = Math.sqrt( z[0]*z[0] + z[1]*z[1] );
+	var x = [ -z[1]/xlen, z[0]/xlen, 0 ];
+	var y = [ z[1]*x[2] - z[2]*x[1], z[2]*x[0] - z[0]*x[2], z[0]*x[1] - z[1]*x[0] ];
+	
+	var worldToCam = [
+		x[0], y[0], z[0], 0,
+		x[1], y[1], z[1], 0,
+		x[2], y[2], z[2], 0,
+		-dot(x,c), -dot(y,c), -dot(z,c), 1,
+	];
+	var camToWorld = [
+		x[0], x[1], x[2], 0,
+		y[0], y[1], y[2], 0,
+		z[0], z[1], z[2], 0,
+		c[0], c[1], c[2], 1
+	];
+	return { camToWorld:camToWorld, worldToCam:worldToCam };
+}
+function ProjectionMatrix( c, z, fov_angle=60 )
+{
+	var r = c.width / c.height;
+	var n = (z - 1.74);
+	const min_n = 0.001;
+	if ( n < min_n ) n = min_n;
+	var f = (z + 1.74);;
+	var fov = 3.145 * fov_angle / 180;
+	var s = 1 / Math.tan( fov/2 );
+	return [
+		s/r, 0, 0, 0,
+		0, s, 0, 0,
+		0, 0, (n+f)/(f-n), 1,
+		0, 0, -2*n*f/(f-n), 0
+	];
+}
