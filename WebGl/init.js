@@ -2,7 +2,7 @@ var boxDrawer;
 var pointDrawer;
 var meshDrawer;
 var canvas, gl;
-var rotX=0, rotY=0, transY=0, transZ=3;
+var viewrotX=0, viewrotY=0, transY=0, transZ=3;
 var MV, MVP; // view matrices
 
 // Called once to initialize
@@ -86,7 +86,7 @@ function UpdateCanvasSize()
 	canvas.style.width  = width  + 'px';
 	canvas.style.height = height + 'px';
 	gl.viewport( 0, 0, canvas.width, canvas.height );
-	UpdateViewMatrices();
+	UpdateProjectionMatrix();
 }
 
 function UpdateProjectionMatrix() {
@@ -114,9 +114,10 @@ function UpdateProjectionMatrix() {
 
 function UpdateViewMatrices()
 {
-	var perspectiveMatrix = ProjectionMatrix( canvas, transZ );
+	//perspectiveMatrix = ProjectionMatrix( canvas, transZ );
 	MV  = GetModelViewMatrix( 0, transY, transZ, rotX, rotY );
 	MVP = MatrixMult( perspectiveMatrix, MV );
+	console.log(MV)
 }
 
 // This is the main function that handled WebGL drawing
@@ -125,22 +126,23 @@ function DrawScene()
 	gl.flush();
 
 	// Clear the screen and the depth buffer.
-	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 	var trans = GetTrans();
-	//var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
+	var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
+	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
 	// Clear the screen and the depth buffer.
 	background.draw(trans);
+	MV = trans.camToWorld
 	// Draw the curve and then the line segments that connect the control points.
 	var nrmTrans = [ MV[0],MV[1],MV[2], MV[4],MV[5],MV[6], MV[8],MV[9],MV[10] ];
 	for (var i = 0; i<drawers.length; i++){
 		//console.log(i)
-		drawers[i].draw( MVP, MV, nrmTrans );
-		pdrawer[i].draw( MVP);
+		drawers[i].draw( mvp, MV, nrmTrans );
+		pdrawer[i].draw( mvp);
 
 	}
 	if ( showBox.checked ) {
-		boxDrawer.draw( MVP );
+		boxDrawer.draw( mvp );
 	}
 	//pointDrawer.draw( MVP );
 }

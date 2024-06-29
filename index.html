@@ -56,7 +56,9 @@
 	var viewRotX = 0, viewRotZ = 0, transZ = 3;
 	const transZmin = 1.001;
 	const transZmax = 10;
-	var canvas, gl;
+	var canvas, gl,showBox;
+	var perspectiveMatrix;
+
 	var environmentTexture;
 	var screenQuad = {
 		init(fov, z) {
@@ -114,51 +116,40 @@ var showBox;
 var drawers = new Array();
 var pdrawer = new Array();
 var massSpring, massSpring2;
-window.onload = function() {
-	showBox = document.getElementById('show-box');
-	InitWebGL();
-	lightView = new LightView(drawers);
-	canvas.zoom = function( s ) {
-		transZ *= s/canvas.height + 1;
-		UpdateViewMatrices();
-		//UpdateProjectionMatrix();
-		DrawScene();
-	}
-	canvas.onwheel = function() { canvas.zoom(0.3*event.deltaY); }
-	canvas.onmousedown = function() {
-		if ( massSpring.mouseDown() || massSpring2.mouseDown() ) {
-			canvas.ondblclick = null;
-			return;
-		}
-		canvas.ondblclick = canvas.resetView;
-		var cx = event.clientX;
-		var cy = event.clientY;
-		if ( event.ctrlKey ) {
-			canvas.onmousemove = function() {
-				canvas.zoom(5*(event.clientY - cy));
-				cy = event.clientY;
-			}
-		} else if ( event.altKey ) {
-			canvas.onmousemove = function() {
-				let s = 1.5*transZ*(event.clientY - cy);
-				transY -= s/canvas.height;
-				UpdateViewMatrices();
-				//UpdateProjectionMatrix();
-				DrawScene();
-				cy = event.clientY;
-			}
-		} else {
-			canvas.onmousemove = function() {
-				rotY += (cx - event.clientX)/canvas.width*5;
-				rotX += (cy - event.clientY)/canvas.height*5;
-				cx = event.clientX;
-				cy = event.clientY;
-				UpdateViewMatrices();
-				//UpdateProjectionMatrix();
-				DrawScene();
-			}
-		}
-	}
+window.onload = function () {
+				showBox = document.getElementById('show-box');
+
+                InitWebGL();
+                canvas.zoom = function (s) {
+                    transZ *= s / canvas.height + 1;
+                    if (transZ < transZmin) transZ = transZmin;
+                    if (transZ > transZmax) transZ = transZmax;
+                    UpdateProjectionMatrix();
+                    DrawScene();
+                }
+                canvas.onwheel = function () { canvas.zoom(0.3 * event.deltaY); }
+                canvas.onmousedown = function () {
+                    var cx = event.clientX;
+                    var cy = event.clientY;
+                    if (event.ctrlKey) {
+                        canvas.onmousemove = function () {
+                            canvas.zoom(5 * (event.clientY - cy));
+                            cy = event.clientY;
+                        }
+                    } else {
+                        canvas.onmousemove = function () {
+                            viewRotZ += (cx - event.clientX) / canvas.width * 5;
+                            viewRotX -= (cy - event.clientY) / canvas.height * 5;
+                            cx = event.clientX;
+                            cy = event.clientY;
+                            const eps = 0.01;
+                            if (viewRotX < -0.1) viewRotX = -0.1;
+                            if (viewRotX > Math.PI / 2 - eps) viewRotX = Math.PI / 2 - eps;
+                            UpdateProjectionMatrix();
+                            DrawScene();
+                        }
+                    }
+                }
 	canvas.onmouseup = canvas.onmouseleave = function() {
 		massSpring.mouseUp();
 		massSpring2.mouseUp();
