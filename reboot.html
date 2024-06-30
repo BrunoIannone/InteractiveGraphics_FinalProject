@@ -7,6 +7,8 @@
         <script type="text/javascript" src="Matrix_Utils/matrix_utils.js"></script>
         <script type="text/javascript" src="ScreenQuad/screen_quad.js"></script>
         <script type="text/javascript" src="Spheres/sphere.js"></script>
+        <script type="text/javascript" src="RayTracing/ray_tracing.js"></script>
+        <script type="text/javascript" src="project6.js"></script>
 
         <!--SHADER -->
         <script id="raytraceVS" type="x-shader/x-vertex">
@@ -102,6 +104,10 @@
             var canvas, gl, background, perspectiveMatrix;
             var triSphere,sphereDrawer;
             var environmentTexture;
+            const maxBounceLimit = 16;
+            var primaryRT, secondaryRT;
+            //var spheres;
+
             var lights = [
 	        {
 		        position:  [ 0, 0, 1000 ],
@@ -195,6 +201,7 @@ var spheres = fixed_spheres.slice();*/
                 //triSphere = new TriSphereClass(20,gl);
                 background = new BackGround(gl);
                 //console.log(gl)
+                
                 sphereDrawer = new SphereDrawer(20,gl);
                 
 	            sphereDrawer.setLight( lights[0].position, lights[0].intensity );
@@ -207,8 +214,21 @@ var spheres = fixed_spheres.slice();*/
                     n: 100
                     }
                 }, )
-                
+                sphereDrawer.spheres.push({
+		        center: [ 2, 0, 0 ],
+		        radius: 0.9,
+		        mtl: {
+                    k_d: [ 0.5, 0.0, 0.0 ],
+                    k_s: [ 0.8, 0.8, 0.8 ],
+                    n: 100
+                    }
+                }, )
+                //spheres = sphereDrawer.spheres;
+                primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
+	            secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
                 UpdateCanvasSize();
+                primaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
+	            secondaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
                 //InitScene();
             }
             function UpdateCanvasSize() {
@@ -262,7 +282,7 @@ var spheres = fixed_spheres.slice();*/
                     sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s) );
                 }
-            	/*
+            	
                 // Ray Tracing
                 if ( document.getElementById('raytrace').checked ) {
                     primaryRT.draw( trans );
@@ -271,7 +291,7 @@ var spheres = fixed_spheres.slice();*/
                 // Rasterization + Ray Tracing
                 if ( document.getElementById('secondary').checked ) {
                     secondaryRT.draw( mvp, trans );
-                }*/
+                }
             }
 
             function InitShaderProgramFromScripts(vs, fs) {
@@ -363,6 +383,24 @@ var spheres = fixed_spheres.slice();*/
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
                 DrawScene();
             }
+            function IncBounceLimit( inc )
+{
+	var b = parseInt(document.getElementById('bounces-value').innerText);
+	b += inc;
+	if ( b < 0 ) b = 0;
+	if ( b > maxBounceLimit ) b = maxBounceLimit;
+	SetBounceLimit( b );
+	document.getElementById('bounces-range').value = b;
+}
+
+function SetBounceLimit( b )
+{
+	document.getElementById('bounces-value').innerText = b;
+	primaryRT.setBounceLimit( b );
+	secondaryRT.setBounceLimit( b );
+	UpdateProjectionMatrix();
+	DrawScene();
+}
         </script>
 
 

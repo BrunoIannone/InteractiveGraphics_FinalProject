@@ -14,11 +14,7 @@ input[type=checkbox], label {
 input[type=range] {
 	width: 100%;
 }
-input[type=button] {
-	width: 100%;
-	min-width: 9em;
-}
-#canvas {
+canvas {
 	display: block;
 	position: absolute;
 	top:  0;
@@ -28,89 +24,41 @@ input[type=button] {
 }
 #canvas-div {
 	position: relative;
-}
-.sel {
-	cursor: hand;
+	width: 100%;
+	height: 100%;
 }
 #controls-div {
-	vertical-align: top;
-	background-color: #333;
-	overflow: auto;
+	background-color: rgba(0,0,0,0.5);
+	position: absolute;
+	right: 1em;
+	top: 1em;
+	width: 18em;
 }
 #controls {
 	padding: 1em;
 }
-.control-group {
-	position: relative;
-	max-width: 12em;
-}
 .control {
 	padding: 0.2em;
+	clear: both;
 }
-.control-x {
-	display: none;
-}
-#lightcontrol {
-	width:  12em;
-	height: 12em;
-	background-color: black;
-	outline: 1px solid white;
-	outline-offset: -1px;
-}
-#lightcontrol-label {
-	position: absolute;
-	top: 0.2em;
-	left: 0.2em;
-	pointer-events: none;
-}
-#shininess-label {
-	float: left;
-}
-.value {
+.val {
 	float: right;
 	text-align: right;
-	width: 4em;
 }
-@media (orientation: landscape) {
-	#canvas-div {
-		display: inline-block;
-		width:  calc(100% - 14em);
-		height: 100%;
-	}
-	#controls-div {
-		display: inline-block;
-		width:   14em;
-		height: 100%;
-	}
-	.control-group {
-		overflow: hidden;
-	}
-	.control-group ~ .control-group {
-		margin-top: 1em;
-	}
-	#texture-img {
-		width: 100%;
-		height: auto;
-	}
+.value {
+	margin-right: 0.5em;
 }
-@media (orientation: portrait) {
-	#canvas-div {
-		width:  100%;
-		height: calc(100% - 20em);
-	}
-	#controls-div {
-		width:  100%;
-		height: 20em;
-	}
-	.control-group {
-		display: inline-block;
-		vertical-align: top;
-	}
-	.control-group ~ .control-group {
-		margin-left: 2em;
-	}
-	#texture-img {
-		width: auto;
-		height: 5em;
-	}
+.btn {
+	width: 100%;
+}
+#buttons {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+#buttons input[type=button] {
+	background-color: rgba(80,80,80,0.5);
+	color: #aaa;
+	font-size: 70%;
+	outline: none;
 }

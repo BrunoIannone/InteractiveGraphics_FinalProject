@@ -120,9 +120,7 @@ class SphereProg
 	{
         this.gl = gl;
         this.subdiv = subdiv
-        
-        console.log(this.gl);
-		
+    		
     }
     init(){
         this.mvp     = this.gl.getUniformLocation( this.prog, 'mvp' );
