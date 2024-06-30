@@ -88,7 +88,10 @@
                 }
                 gl_FragColor = vec4(color,1);
             }
+            
             </script>
+            
+            
         <!-- -- -->
 
         <!-- VARIABILI -->
@@ -106,8 +109,9 @@
 	        }
             
 ];
-var spheres = [
-	/*{
+
+/*var fixed_spheres = [
+	{
 		center: [ 0, 0, -10001.0 ],
 		radius: 10000.0,
 		mtl: {
@@ -115,7 +119,7 @@ var spheres = [
 			k_s: [ 0.2, 0.2, 0.2 ],
 			n: 10
 		}
-	},*/
+	},
 	{
 		center: [ 0, 0, 0 ],
 		radius: 1.0,
@@ -126,6 +130,8 @@ var spheres = [
 		}
 	},
 ];
+var spheres = fixed_spheres.slice();*/
+
         </script>
         <!-- --------- -->
 
@@ -190,8 +196,18 @@ var spheres = [
                 background = new BackGround(gl);
                 //console.log(gl)
                 sphereDrawer = new SphereDrawer(20,gl);
+                
 	            sphereDrawer.setLight( lights[0].position, lights[0].intensity );
-
+                sphereDrawer.spheres.push({
+		        center: [ 0, 0, 0 ],
+		        radius: 1.0,
+		        mtl: {
+                    k_d: [ 0.5, 0.0, 0.0 ],
+                    k_s: [ 0.8, 0.8, 0.8 ],
+                    n: 100
+                    }
+                }, )
+                
                 UpdateCanvasSize();
                 //InitScene();
             }
@@ -240,15 +256,13 @@ var spheres = [
                 // Clear the screen and the depth buffer.
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 background.draw(trans);
-                sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
-		        spheres.forEach( s => sphereDrawer.draw(s) );
                 // Rasterization
-                /*if ( document.getElementById('raster').checked ) {
+                if ( document.getElementById('raster').checked ) {
                     background.draw( trans );
                     sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
-                    spheres.forEach( s => sphereDrawer.draw(s) );
+                    sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s) );
                 }
-            	
+            	/*
                 // Ray Tracing
                 if ( document.getElementById('raytrace').checked ) {
                     primaryRT.draw( trans );

@@ -168,5 +168,6 @@ class SphereDrawer extends SphereProg
         this.prog = InitShaderProgramFromScripts( 'sphereVS', 'sphereFS' );
         
 		this.init();
+        this.spheres = [];
 	}
 };
