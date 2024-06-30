@@ -9,6 +9,7 @@
         <script type="text/javascript" src="Spheres/sphere.js"></script>
         <script type="text/javascript" src="RayTracing/ray_tracing.js"></script>
         <script type="text/javascript" src="project6.js"></script>
+        <script type="text/javascript" src="Arena/arena.js"></script>
 
         <!--SHADER -->
         <script id="raytraceVS" type="x-shader/x-vertex">
@@ -106,6 +107,8 @@
             var environmentTexture;
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
+            var boxDrawer, showBox;
+
             //var spheres;
 
             var lights = [
@@ -226,6 +229,7 @@ var spheres = fixed_spheres.slice();*/
                 //spheres = sphereDrawer.spheres;
                 primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
 	            secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
+                boxDrawer = new BoxDrawer()
                 UpdateCanvasSize();
                 primaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
 	            secondaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
@@ -276,6 +280,10 @@ var spheres = fixed_spheres.slice();*/
                 // Clear the screen and the depth buffer.
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 background.draw(trans);
+                if(showBox.checked){
+                    boxDrawer.draw(mvp);
+
+                }
                 // Rasterization
                 if ( document.getElementById('raster').checked ) {
                     background.draw( trans );
@@ -338,6 +346,8 @@ var spheres = fixed_spheres.slice();*/
 
 
             window.onload = function () {
+                showBox = document.getElementById('show-box');
+
                 InitWebGL();
                 canvas.zoom = function (s) {
                     transZ *= s / canvas.height + 1;
@@ -428,6 +438,8 @@ function ShowControls()
 <div class="control"><span id="bounces-label">Bounce Limit:</span><span class="val"><span class="value" id="bounces-value">5</span><input type="button" value="+" onclick="IncBounceLimit(1)"><input type="button" value="&ndash;" onclick="IncBounceLimit(-1)"></span><input id="bounces-range" type="range" min="0" max="16" value="5" oninput="SetBounceLimit(this.value)"/></div>
 <div class="control"><span id="count-label">Sphere Count:</span><span class="val"><span class="value" id="count-value">10</span><input type="button" value="+" onclick="IncCount(1)"><input type="button" value="&ndash;" onclick="IncCount(-1)"></span><input id="count-range" type="range" min="1" max="100" value="10" oninput="SetCount(this.value)" onchange="NewScene()"/></div>
 <div class="control"><input type="button" class="btn" value="New Random Scene" onclick="NewScene()"></div>
+<div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()" checked /><label for="show-box"> Show Box</label></div>
+
 </div>
 </div>
 </div>
