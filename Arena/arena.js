@@ -18,10 +18,10 @@ class BoxDrawer {
 			-1, -1,  1,
 			-1,  1, -1,
 			-1,  1,  1,
-			 1, -1, -1,
-			 1, -1,  1,
-			 1,  1, -1,
-			 1,  1,  1 ];
+			 3, -1, -1,
+			 3, -1,  1,
+			 3,  1, -1,
+			 3,  1,  1 ];
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pos), gl.STATIC_DRAW);
 
