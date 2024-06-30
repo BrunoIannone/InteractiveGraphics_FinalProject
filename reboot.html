@@ -1,0 +1,291 @@
+<doctype html>
+    <html>
+
+    <head>
+        <title>Basketball_reboot</title>
+        <link rel="stylesheet" href="Style/index.css">
+        <script type="text/javascript" src="Matrix_Utils/matrix_utils.js"></script>
+        <script type="text/javascript" src="ScreenQuad/screen_quad.js"></script>
+
+        <!--SHADER -->
+        <script id="raytraceVS" type="x-shader/x-vertex">
+            attribute vec3 p;
+            uniform mat4 proj;
+            uniform mat4 c2w; //camera to world
+            varying vec3 ray_pos;
+            varying vec3 ray_dir;
+            void main()
+            {
+                gl_Position = proj * vec4(p,1);
+                vec4 rp = c2w * vec4(0,0,0,1);
+                ray_pos = rp.xyz;
+                vec4 rd = c2w * vec4(p,1);
+                ray_dir = rd.xyz - ray_pos;
+            }
+        </script>
+
+        <script id="envFS" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec3 ray_dir;
+            uniform samplerCube envMap;
+            void main()
+            {
+                gl_FragColor = textureCube( envMap, ray_dir.xzy );
+            }
+        </script>
+        <!-- -- -->
+
+        <!-- VARIABILI -->
+        <script>
+            var viewRotX = 0, viewRotZ = 0, transZ = 3;
+            const transZmin = 1.001;
+            const transZmax = 10;
+            var canvas, gl, background;
+            var environmentTexture;
+        </script>
+        <!-- --------- -->
+
+        <script>
+            function InitEnvironmentMap() {
+                environmentTexture = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, environmentTexture);
+
+                const url = 'http://localhost:3000/';
+                const files = [
+                    'px.png',
+                    'nx.png',
+                    'py.png',
+                    'ny.png',
+                    'pz.png',
+                    'nz.png',
+                ];
+                const faces = [
+                    gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+                    gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+                    gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+                    gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                    gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+                    gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+                ];
+
+                var loaded = 0;
+                for (var i = 0; i < 6; ++i) {
+                    gl.texImage2D(faces[i], 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.face = faces[i];
+                    img.onload = function () {
+                        gl.bindTexture(gl.TEXTURE_CUBE_MAP, environmentTexture);
+                        gl.texImage2D(this.face, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this);
+                        loaded++;
+                        if (loaded == 6) {
+                            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+                            DrawScene();
+                        }
+                    };
+                    img.src = url + files[i];
+                }
+                gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+            }
+            function InitWebGL() {
+                // Initialize the WebGL canvas
+                canvas = document.getElementById("canvas");
+                canvas.oncontextmenu = function () { return false; };
+                gl = canvas.getContext("webgl2", { antialias: false, depth: true });	// Initialize the GL context
+                if (!gl) {
+                    alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+                    return;
+                }
+
+                // Initialize settings
+                gl.clearColor(0, 0, 0, 0);
+                gl.enable(gl.DEPTH_TEST);
+
+                InitEnvironmentMap();
+
+                background = new BackGround(gl);
+
+                UpdateCanvasSize();
+                //InitScene();
+            }
+            function UpdateCanvasSize() {
+                canvas.style.width = "100%";
+                canvas.style.height = "100%";
+                const pixelRatio = window.devicePixelRatio || 1;
+                canvas.width = pixelRatio * canvas.clientWidth;
+                canvas.height = pixelRatio * canvas.clientHeight;
+                const width = (canvas.width / pixelRatio);
+                const height = (canvas.height / pixelRatio);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                UpdateProjectionMatrix();
+            }
+            function UpdateProjectionMatrix() {
+                const fov = 60;
+                var r = canvas.width / canvas.height;
+                var n = 0.1;
+                const min_n = 0.001;
+                if (n < min_n) n = min_n;
+                var f = transZmax * 100;
+                var ff = Math.PI * fov / 180;
+                var tant_2 = Math.tan(ff / 2);
+                var s = 1 / tant_2;
+                perspectiveMatrix = [
+                    s / r, 0, 0, 0,
+                    0, s, 0, 0,
+                    0, 0, -(n + f) / (f - n), -1,
+                    0, 0, -2 * n * f / (f - n), 0
+                ];
+
+                //screenQuad.init(fov, (n + f) / 2); can be removed
+                background.updateProj(fov, (n + f) / 2);
+                //primaryRT.updateProj();
+                //secondaryRT.updateProj();
+            }
+
+            function DrawScene() {
+                gl.flush();
+
+                var trans = GetTrans();
+                var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
+
+                // Clear the screen and the depth buffer.
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                background.draw(trans);
+                // Rasterization
+                /*if ( document.getElementById('raster').checked ) {
+                    background.draw( trans );
+                    sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
+                    spheres.forEach( s => sphereDrawer.draw(s) );
+                }
+            	
+                // Ray Tracing
+                if ( document.getElementById('raytrace').checked ) {
+                    primaryRT.draw( trans );
+                }
+            	
+                // Rasterization + Ray Tracing
+                if ( document.getElementById('secondary').checked ) {
+                    secondaryRT.draw( mvp, trans );
+                }*/
+            }
+
+            function InitShaderProgramFromScripts(vs, fs) {
+                return InitShaderProgram(document.getElementById(vs).text, document.getElementById(fs).text);
+            }
+
+            // This is a helper function for compiling the given vertex and fragment shader source code into a program.
+            function InitShaderProgram(vsSource, fsSource) {
+                const vs = CompileShader(gl.VERTEX_SHADER, vsSource);
+                const fs = CompileShader(gl.FRAGMENT_SHADER, fsSource);
+
+                if (!vs || !fs) return null;
+
+                const prog = gl.createProgram();
+                gl.attachShader(prog, vs);
+                gl.attachShader(prog, fs);
+                gl.linkProgram(prog);
+
+                if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+                    alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(prog));
+                    return null;
+                }
+                return prog;
+            }
+
+            // This is a helper function for compiling a shader, called by InitShaderProgram().
+            function CompileShader(type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    alert('An error occurred compiling shader:\n' + gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+
+
+        </script>
+
+        <script>
+
+
+            window.onload = function () {
+                InitWebGL();
+                canvas.zoom = function (s) {
+                    transZ *= s / canvas.height + 1;
+                    if (transZ < transZmin) transZ = transZmin;
+                    if (transZ > transZmax) transZ = transZmax;
+                    UpdateProjectionMatrix();
+                    DrawScene();
+                }
+                canvas.onwheel = function () { canvas.zoom(0.3 * event.deltaY); }
+                canvas.onmousedown = function () {
+                    var cx = event.clientX;
+                    var cy = event.clientY;
+                    if (event.ctrlKey) {
+                        canvas.onmousemove = function () {
+                            canvas.zoom(5 * (event.clientY - cy));
+                            cy = event.clientY;
+                        }
+                    } else {
+                        canvas.onmousemove = function () {
+                            viewRotZ += (cx - event.clientX) / canvas.width * 5;
+                            viewRotX -= (cy - event.clientY) / canvas.height * 5;
+                            cx = event.clientX;
+                            cy = event.clientY;
+                            const eps = 0.01;
+                            if (viewRotX < -0.1) viewRotX = -0.1;
+                            if (viewRotX > Math.PI / 2 - eps) viewRotX = Math.PI / 2 - eps;
+                            UpdateProjectionMatrix();
+                            DrawScene();
+                        }
+                    }
+                }
+                canvas.onmouseup = canvas.onmouseleave = function () {
+                    canvas.onmousemove = null;
+                }
+
+                DrawScene();
+            };
+            function WindowResize() {
+                UpdateCanvasSize();
+                DrawScene();
+            }
+            function UseEnvironmentMap(param) {
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
+                DrawScene();
+            }
+        </script>
+
+
+        <script type="text/javascript">
+
+        </script>
+        
+    </head>
+
+    <body onresize="WindowResize()">
+<div id="canvas-div"><canvas id="canvas"></canvas></div><div id="controls-div">
+<div id="buttons"><input type="button" value="V" onclick="ShowControls()"/></div>
+<div id="controls">
+<div class="control-group">
+<div class="control"><input id="raster" name="method" type="radio" onchange="DrawScene()" /><label for="raster"> Rasterization</label><br/></div>
+<div class="control"><input id="raytrace" name="method" type="radio" onchange="DrawScene()" checked /><label for="raytrace"> Ray Tracing</label><br/></div>
+<div class="control"><input id="secondary" name="method" type="radio" onchange="DrawScene()" /><label for="secondary"> Rasterization + Ray Tracing</label><br/></div>
+<div class="control"><hr/></div>
+<div class="control"><input id="envmap" name="envmap" type="checkbox" onchange="UseEnvironmentMap(this)" checked /><label for="envmap"> Environment Map</label></div>
+<div class="control"><span id="bounces-label">Bounce Limit:</span><span class="val"><span class="value" id="bounces-value">5</span><input type="button" value="+" onclick="IncBounceLimit(1)"><input type="button" value="&ndash;" onclick="IncBounceLimit(-1)"></span><input id="bounces-range" type="range" min="0" max="16" value="5" oninput="SetBounceLimit(this.value)"/></div>
+<div class="control"><span id="count-label">Sphere Count:</span><span class="val"><span class="value" id="count-value">10</span><input type="button" value="+" onclick="IncCount(1)"><input type="button" value="&ndash;" onclick="IncCount(-1)"></span><input id="count-range" type="range" min="1" max="100" value="10" oninput="SetCount(this.value)" onchange="NewScene()"/></div>
+<div class="control"><input type="button" class="btn" value="New Random Scene" onclick="NewScene()"></div>
+</div>
+</div>
+</div>
+</div>
+</body>
+
+    </html>
