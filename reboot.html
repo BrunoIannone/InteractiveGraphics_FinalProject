@@ -401,6 +401,11 @@ function SetBounceLimit( b )
 	UpdateProjectionMatrix();
 	DrawScene();
 }
+function ShowControls()
+{
+	var c = document.getElementById('controls');
+	c.style.display = c.style.display == 'none' ? '' : 'none';
+}
         </script>
 
 
