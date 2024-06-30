@@ -2,7 +2,7 @@
 <!-- Copyright 2020, Cem Yuksel, University of Utah -->
 <html>
 <head>
-<title>BeyBlade Simulation</title>
+<title>Basketball</title>
 <link rel="stylesheet" href="Style/index.css">
 
 <script type="text/javascript" id="includedscript" src="project7.js"></script>
@@ -129,6 +129,12 @@ window.onload = function () {
                 }
                 canvas.onwheel = function () { canvas.zoom(0.3 * event.deltaY); }
                 canvas.onmousedown = function () {
+					if ( massSpring.mouseDown() || massSpring2.mouseDown() ) {
+						canvas.ondblclick = null;
+						return;
+					}
+					canvas.ondblclick = canvas.resetView;
+
                     var cx = event.clientX;
                     var cy = event.clientY;
                     if (event.ctrlKey) {
@@ -158,11 +164,12 @@ window.onload = function () {
 	}
 	canvas.onmousemove = function() { massSpring.mouseMove();massSpring2.mouseMove(); }
 	canvas.resetView = function() {
-		rotX = 0;
-		rotY = 0;
+		viewrotX = 0;
+		viewrotY = 0;
 		transY = 0;
 		transZ = 3;
-		UpdateViewMatrices();
+		
+		UpdateProjectionMatrix();
 		DrawScene();
 	}
 	

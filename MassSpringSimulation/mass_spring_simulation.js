@@ -6,6 +6,7 @@ class MassSpring {
 
 	constructor(random,label)
 	{
+		
 		this.label = label;
 		this.random = random;
 

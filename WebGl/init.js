@@ -124,27 +124,33 @@ function UpdateViewMatrices()
 function DrawScene()
 {
 	gl.flush();
-
+	MV  =  GetModelViewMatrix( 0, transY, transZ, viewrotX, viewrotY );
+	//MVP = MatrixMult( perspectiveMatrix, MV );
+	
+	
 	// Clear the screen and the depth buffer.
 	var trans = GetTrans();
-	var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
+	MVP = MatrixMult(perspectiveMatrix, trans.worldToCam);
+	
+
+	//console.log(["1",MVP,"2",mvp]);
 	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
 	// Clear the screen and the depth buffer.
 	background.draw(trans);
-	MV = trans.camToWorld
-	// Draw the curve and then the line segments that connect the control points.
+	MV  =  GetModelViewMatrix( 0, transY, transZ, viewrotX, viewrotY );
+	;	// Draw the curve and then the line segments that connect the control points.
 	var nrmTrans = [ MV[0],MV[1],MV[2], MV[4],MV[5],MV[6], MV[8],MV[9],MV[10] ];
 	for (var i = 0; i<drawers.length; i++){
 		//console.log(i)
-		drawers[i].draw( mvp, MV, nrmTrans );
-		pdrawer[i].draw( mvp);
+		drawers[i].draw( MVP, MV, nrmTrans );
+		pdrawer[i].draw( MVP);
 
 	}
 	if ( showBox.checked ) {
-		boxDrawer.draw( mvp );
+		boxDrawer.draw( MVP );
 	}
-	//pointDrawer.draw( MVP );
+	pointDrawer.draw( MVP );
 }
 function InitShaderProgramFromScripts(vs, fs) {
 	return InitShaderProgram(document.getElementById(vs).text, document.getElementById(fs).text);
