@@ -170,16 +170,13 @@ class SphereDrawer extends SphereProg
         this.spheres = [];
 	}
 	addSphere(sphere){
-		console.log(sphere instanceof Sphere);
 
 		if (!(sphere instanceof Sphere)){
 			console.log("Tried to add a sphere that is not an instance of Sphere" );
 			return;
 
 		}
-		console.log(sphere instanceof Sphere);
 
-		console.log("ok");
 		this.spheres.push(sphere);
 	};
 }
