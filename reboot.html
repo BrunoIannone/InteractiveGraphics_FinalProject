@@ -9,7 +9,12 @@
         <script type="text/javascript" src="Spheres/sphere.js"></script>
         <script type="text/javascript" src="RayTracing/ray_tracing.js"></script>
         <script type="text/javascript" src="project6.js"></script>
+        <script type="text/javascript" src="project7.js"></script>
+        <script type="text/javascript" src="obj.js"></script>
+
         <script type="text/javascript" src="Arena/arena.js"></script>
+        <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
+        <script type="text/javascript" src="Vec3/vec3.js"></script>
 
         <!--SHADER -->
         <script id="raytraceVS" type="x-shader/x-vertex">
@@ -103,11 +108,12 @@
             const transZmin = 1.001;
             const transZmax = 10;
             var canvas, gl, background, perspectiveMatrix;
-            var triSphere,sphereDrawer;
+            var sphereDrawer;//,triSphere;
             var environmentTexture;
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox;
+            var massSpring;
 
             //var spheres;
 
@@ -199,6 +205,7 @@ var spheres = fixed_spheres.slice();*/
                 // Initialize settings
                 gl.clearColor(0, 0, 0, 0);
                 gl.enable(gl.DEPTH_TEST);
+                
 
                 InitEnvironmentMap();
                 //triSphere = new TriSphereClass(20,gl);
@@ -208,24 +215,18 @@ var spheres = fixed_spheres.slice();*/
                 sphereDrawer = new SphereDrawer(20,gl);
                 
 	            sphereDrawer.setLight( lights[0].position, lights[0].intensity );
-                sphereDrawer.spheres.push({
-		        center: [ 0, 0, 0 ],
-		        radius: 1.0,
-		        mtl: {
+                sphereDrawer.addSphere(new Sphere([ 0, 0, 0 ],1.0,{
                     k_d: [ 0.5, 0.0, 0.0 ],
                     k_s: [ 0.8, 0.8, 0.8 ],
                     n: 100
-                    }
-                }, )
-                sphereDrawer.spheres.push({
-		        center: [ 2, 0, 0 ],
-		        radius: 0.9,
-		        mtl: {
+                    },gl,20));
+                sphereDrawer.addSphere(new Sphere([ 2, 0, 0 ],1,{
                     k_d: [ 0.5, 0.0, 0.0 ],
                     k_s: [ 0.8, 0.8, 0.8 ],
                     n: 100
-                    }
-                }, )
+                    },gl,20
+                ))
+                
                 //spheres = sphereDrawer.spheres;
                 primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
 	            secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
@@ -233,6 +234,8 @@ var spheres = fixed_spheres.slice();*/
                 UpdateCanvasSize();
                 primaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
 	            secondaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
+               
+                //massSpring = new MassSpring(false,"1",sphereDrawer.spheres[0].triSphere.b.pos)
                 //InitScene();
             }
             function UpdateCanvasSize() {
@@ -267,8 +270,8 @@ var spheres = fixed_spheres.slice();*/
 
                 //screenQuad.init(fov, (n + f) / 2); can be removed
                 background.updateProj(fov, (n + f) / 2);
-                //primaryRT.updateProj();
-                //secondaryRT.updateProj();
+                primaryRT.updateProj();
+                secondaryRT.updateProj();
             }
 
             function DrawScene() {
@@ -288,6 +291,8 @@ var spheres = fixed_spheres.slice();*/
                 if ( document.getElementById('raster').checked ) {
                     background.draw( trans );
                     sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
+                    //sphereDrawer.spheres.forEach( s => console.log(["pene",s.triSphere]) );
+
                     sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s) );
                 }
             	

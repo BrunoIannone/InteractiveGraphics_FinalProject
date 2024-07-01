@@ -63,7 +63,7 @@ class ScreenQuad{
 	}
 	draw( prog, trans )
 	{
-
+		console.log("pene")		
 		this.gl.useProgram( prog );
 		this.gl.uniformMatrix4fv( this.gl.getUniformLocation( prog, 'c2w' ), false, trans.camToWorld );
 		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.vbuf );

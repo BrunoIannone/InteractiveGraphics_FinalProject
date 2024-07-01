@@ -123,6 +123,7 @@ class SphereProg
     		
     }
     init(){
+		
         this.mvp     = this.gl.getUniformLocation( this.prog, 'mvp' );
 		this.campos  = this.gl.getUniformLocation( this.prog, 'campos' );
 		this.center  = this.gl.getUniformLocation( this.prog, 'center' );
@@ -131,7 +132,7 @@ class SphereProg
 		this.mtl_k_s = this.gl.getUniformLocation( this.prog, 'mtl.k_s' );
 		this.mtl_n   = this.gl.getUniformLocation( this.prog, 'mtl.n' );
 		this.vp      = this.gl.getAttribLocation ( this.prog, 'p' );
-        this.triSphere = new TriSphereClass(this.subdiv,this.gl);
+        //this.triSphere = new TriSphereClass(this.subdiv,this.gl);
 	}
 	setTrans( mvp, campos )
 	{
@@ -153,7 +154,7 @@ class SphereProg
 		this.gl.uniform3fv( this.mtl_k_d, sphere.mtl.k_d );
 		this.gl.uniform3fv( this.mtl_k_s, sphere.mtl.k_s );
 		this.gl.uniform1f ( this.mtl_n,   sphere.mtl.n   );
-		this.triSphere.draw( this.vp );
+		sphere.triSphere.draw( this.vp );
 	}
 };
 
@@ -168,4 +169,32 @@ class SphereDrawer extends SphereProg
 		this.init();
         this.spheres = [];
 	}
-};
+	addSphere(sphere){
+		console.log(sphere instanceof Sphere);
+
+		if (!(sphere instanceof Sphere)){
+			console.log("Tried to add a sphere that is not an instance of Sphere" );
+			return;
+
+		}
+		console.log(sphere instanceof Sphere);
+
+		console.log("ok");
+		this.spheres.push(sphere);
+	};
+}
+class Sphere{
+    constructor(center, radius,mtl,gl,subdiv){
+		this.gl = gl;        
+		this.center = center;
+		this.radius=radius;
+		this.mtl = mtl;
+		this.k_d = mtl.k_d;
+		this.k_s = mtl.k_s;
+		this.n = mtl.n
+		this.triSphere = new TriSphereClass(subdiv,this.gl);
+ 			
+	}
+		
+}
+
