@@ -146,7 +146,7 @@ class SphereProg
 		this.gl.uniform3fv( this.gl.getUniformLocation( this.prog, 'light.position'  ), pos    );
 		this.gl.uniform3fv( this.gl.getUniformLocation( this.prog, 'light.intensity' ), intens );
 	}
-	draw( sphere )
+	draw( sphere,mvp,mv,norm )
 	{
 		this.gl.useProgram( this.prog );
 		this.gl.uniform3fv( this.center,  sphere.center  );
@@ -154,7 +154,7 @@ class SphereProg
 		this.gl.uniform3fv( this.mtl_k_d, sphere.mtl.k_d );
 		this.gl.uniform3fv( this.mtl_k_s, sphere.mtl.k_s );
 		this.gl.uniform1f ( this.mtl_n,   sphere.mtl.n   );
-		sphere.triSphere.draw( this.vp );
+		sphere.triSphere.draw( mvp,mv,norm );
 	}
 };
 
@@ -181,7 +181,7 @@ class SphereDrawer extends SphereProg
 	};
 }
 class Sphere{
-    constructor(center, radius,mtl,gl,subdiv){
+    constructor(center, radius,mtl,gl,subdiv,meshDrawer){
 		this.gl = gl;        
 		this.center = center;
 		this.radius=radius;
@@ -189,9 +189,58 @@ class Sphere{
 		this.k_d = mtl.k_d;
 		this.k_s = mtl.k_s;
 		this.n = mtl.n
-		this.triSphere = new TriSphereClass(subdiv,this.gl);
+		this.triSphere = new SphereMesh(this.gl,meshDrawer);//new TriSphereClass(subdiv,this.gl);
  			
 	}
 		
 }
 
+class SphereMesh{
+	constructor(gl,meshDrawer){
+		//console.log(document.getElementById("sphereee").text);
+		this.gl = gl;
+		this.meshDrawer = meshDrawer;
+		
+		this.setMesh(document.getElementById("sphereee").text);
+
+	}
+	setMesh( objdef )
+	{
+		this.mesh = new ObjMesh;
+		this.mesh.parse( objdef );
+		var box = this.mesh.getBoundingBox();
+		var shift = [
+			-(box.min[0]+box.max[0])/2,
+			-(box.min[1]+box.max[1])/2,
+			-(box.min[2]+box.max[2])/2
+		];
+		var size = [
+			(box.max[0]-box.min[0])/2,
+			(box.max[1]-box.min[1])/2,
+			(box.max[2]-box.min[2])/2
+		];
+		if(this.random){
+			shift = [
+				(Math.random() * 2 - 1),
+				(Math.random() * 2 - 1),
+				(Math.random() * 2 - 1)
+			];
+		}
+		var maxSize = Math.max( size[0], size[1], size[2] );
+		var scale = 0.4/maxSize;
+		this.mesh.shiftAndScale( shift, scale );
+		this.mesh.computeNormals();
+		//this.reset();
+		//this.initSprings();
+		//DrawScene();
+	}
+	draw(mvp,mv,norm){
+
+		this.buffers = this.mesh.getVertexBuffers();
+	
+		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		this.meshDrawer.draw(mvp,mv,norm);
+
+	}
+
+}
