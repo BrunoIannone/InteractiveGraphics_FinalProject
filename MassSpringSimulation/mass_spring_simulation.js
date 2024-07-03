@@ -9,7 +9,7 @@ class MassSpring {
 		this.label = label;
 		this.random = random;
 
-		this.gravity = new Vec3( 0, 2.0, 0 );
+		this.gravity = new Vec3( 0, 0, -20.0 );
 		this.mass = .1;
 		this.stiffness = 1;
 		this.damping = 1;
@@ -149,7 +149,6 @@ class MassSpring {
 			this.holdVert.set(p);
 			this.vel[ this.selVert ].init(0,0,0);
 		}
-		
 		this.updateMesh();
 	}
 	startSimulation()

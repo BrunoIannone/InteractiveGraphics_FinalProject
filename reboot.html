@@ -12,6 +12,7 @@
         <script type="text/javascript" src="project7.js"></script>
         <script type="text/javascript" src="obj.js"></script>
         <script type="text/javascript" src="Cube/vertex_selection_color.js"></script>
+        <script type="text/javascript" src="Light/light.js"></script>
 
         <script type="text/javascript" src="Arena/arena.js"></script>
         <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
@@ -114,7 +115,7 @@
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox;
-            var massSpring,MVP;
+            var massSpring,MVP,lightView;
 
             //var spheres;
 
@@ -232,8 +233,12 @@ var spheres = fixed_spheres.slice();*/
 	            secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
                 boxDrawer = new BoxDrawer()
                 UpdateCanvasSize();
-                console.log("si")
+                //console.log("si")
                 massSpring = new MassSpring(false,"1");
+                //console.log(lights.position)
+                //massSpring.meshDrawer.setLightDir_old(0,0,1000)
+                massSpring.meshDrawer.setLightDir([0,0,1000],[1,1,1])
+                massSpring.meshDrawer.setMaterial([ 0.5, 0.5, 0.0 ],[ 0.8, 0.8, 0.8 ],100,[ 0, 0, 0 ],1.0)
                 SetGravity  ( document.getElementById('gravity') );
                 SetMass     ( document.getElementById('mass') );
                 SetStiffness( document.getElementById('stiffness') );
@@ -314,7 +319,7 @@ var spheres = fixed_spheres.slice();*/
                     //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => console.log(["pene",s.triSphere]) );
                     //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
-                    massSpring.meshDrawer.draw(mvp,MV,nrm);
+                    massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
                     massSpring.pointDrawer.draw(mvp);
 
                 }
@@ -498,6 +503,11 @@ function SetShininess( param )
 	document.getElementById('shininess-value').innerText = s.toFixed( s < 10 ? 2 : 0 );
 	meshDrawer.setShininess(s);
 	DrawScene();
+}
+function SetTimeStepSize( param )
+{
+	var s = param.value;
+	document.getElementById('timestep-value').innerText = s + " ms";
 }
 </script>
 

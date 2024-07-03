@@ -7,6 +7,7 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 	// [TO-DO] Modify the code below to form the transformation matrix.
 	var R_x = [1, 0, 0, 0, 0, Math.cos(rotationX), Math.sin(rotationX), 0, 0, -Math.sin(rotationX), Math.cos(rotationX), 0, 0, 0, 0, 1];
 	var R_y = [Math.cos(rotationY), 0, -Math.sin(rotationY), 0, 0, 1, 0, 0, Math.sin(rotationY), 0, Math.cos(rotationY), 0, 0, 0, 0, 1];
+	var R_z = [Math.cos(rotationY),Math.sin(rotationY),0,-Math.sin(rotationY),Math.cos(rotationY),0,0,0,1];
 	var trans = [
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -14,7 +15,7 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 		translationX, translationY, translationZ, 1
 	];
 
-	var mvp = MatrixMult(MatrixMult(trans, R_y), R_x);
+	var mvp = MatrixMult(MatrixMult(trans, R_z), R_x);
 
 	return mvp;
 
@@ -35,26 +36,40 @@ class MeshDrawer
 		//console.log(["MESH",this.prog]);
 		// Get the ids of the uniform variables in the shaders. In this case, the transformation matrix named "mvp","mv","mn"
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
-		this.mv = gl.getUniformLocation(this.prog, 'mv');
-		this.mn = gl.getUniformLocation(this.prog, 'mn');
+		//this.mv = gl.getUniformLocation(this.prog, 'mv');
+		//this.mn = gl.getUniformLocation(this.prog, 'mn');
+		this.mtl_k_d = gl.getUniformLocation( this.prog, 'mtl.k_d' );
+		this.mtl_k_s = gl.getUniformLocation( this.prog, 'mtl.k_s' );
+		this.mtl_n   = gl.getUniformLocation( this.prog, 'mtl.n' );
+		this.center  = gl.getUniformLocation( this.prog, 'center' );
+		this.radius  = gl.getUniformLocation( this.prog, 'radius' );
+		this.campos  = gl.getUniformLocation( this.prog, 'campos' );
+
 
 		// Get the GPU memory position of the vertex position attribute from the VS code
 		this.vertPosShader = gl.getAttribLocation(this.prog, 'vertex_pos');
 
 		// Get the GPU memory position of the texture position attribute from the VS code
-		this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
+		//this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
 
 		// Get the GPU memory position of the normal position attribute from the VS code
 		this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
 
 		// Create the buffer objects
 		this.vertbuffer = gl.createBuffer();
-		this.texbuffer = gl.createBuffer();
+		//this.texbuffer = gl.createBuffer();
 		this.normalBuffer = gl.createBuffer();
 		this.lightDirBuffer = gl.createBuffer();
 
 		// Length value of vertPos array
 		this.vertPoslength = 0;
+	}
+	setMaterial(k_d,k_s,n,center,radius){
+		gl.uniform3fv( this.mtl_k_d, k_d );
+		gl.uniform3fv( this.mtl_k_s, k_s );
+		gl.uniform1f ( this.mtl_n,   n   );
+		gl.uniform3fv( this.center,  center  );
+		gl.uniform1f ( this.radius,  radius  );
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -78,8 +93,8 @@ class MeshDrawer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+		//gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
+		//gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
@@ -104,15 +119,16 @@ class MeshDrawer
 	// the model-view transformation matrixMV, the same matrix returned
 	// by the GetModelViewProjection function above, and the normal
 	// transformation matrix, which is the inverse-transpose of matrixMV.
-	draw( matrixMVP, matrixMV, matrixNormal )
+	draw( matrixMVP, matrixMV, matrixNormal,campos )
 	{
 		// [TO-DO] Complete the WebGL initializations before drawing
 
 		gl.useProgram(this.prog);
 
 		gl.uniformMatrix4fv(this.mvp, false, matrixMVP); //Assign to mvp matrix, matrixMVP matrix (function input)
-		gl.uniformMatrix4fv(this.mv, false, matrixMV); //Assign to mv matrix, matrixMV matrix (function input)
-		gl.uniformMatrix3fv(this.mn, false, matrixNormal); //Assign to mn matrix, matrixNormal matrix (function input)
+		//gl.uniformMatrix4fv(this.mv, false, matrixMV); //Assign to mv matrix, matrixMV matrix (function input)
+		//gl.uniformMatrix3fv(this.mn, false, matrixNormal); //Assign to mn matrix, matrixNormal matrix (function input)
+		gl.uniform3fv( this.campos, campos );
 
 		//Enable triangle drawing from vertPosShader and normalsPosShader array
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer); //Bind to the vertex buffer
@@ -172,20 +188,26 @@ class MeshDrawer
 	}
 	
 	// This method is called to set the incoming light direction
-	setLightDir( x, y, z )
+	setLightDir_old( x, y, z )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
-	
+		console.log([x,y,z])
 		gl.useProgram(this.prog);
 
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
 		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
 
 		gl.uniform3f(lightdir_location, x, y, z);
-		var swapped_lightdir_location = gl.getUniformLocation(this.prog, 'swapped_lightdir'); //Used for handling light direction when swap is true
+		//var swapped_lightdir_location = gl.getUniformLocation(this.prog, 'swapped_lightdir'); //Used for handling light direction when swap is true
 
-		gl.uniform3f(swapped_lightdir_location, x, z, y);
+		//gl.uniform3f(swapped_lightdir_location, x, z, y);
 	
+	}
+	setLightDir( pos, intens )
+	{
+		gl.useProgram( this.prog );
+		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.position'  ), pos    );
+		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.intensity' ), intens );
 	}
 	
 	// This method is called to set the shininess of the material
@@ -223,7 +245,7 @@ function ComputeSpringDampingForce(pi,pj,d,velocities,damping){
 // It updates the given positions and velocities.
 function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
 {
-	
+	UpdateProjectionMatrix();
 	// [TO-DO] Compute the total force of each particle
 	
 	var forces = Array( positions.length ).fill(0); // The total for per particle
@@ -307,84 +329,117 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 		}
 	}
 }
-
-// Vertex shader source code for mesh
-var MeshVS = `
+/*var MeshVS = `
 precision mediump float;
 
 attribute vec3 vertex_pos; //Vertex positions
-attribute vec2 texture_pos; //Texture positions
 attribute vec3 normal_pos; //Normals positions
 
 uniform vec3 lightdir; //Light direction
-uniform vec3 swapped_lightdir; //Light direction when swap is true
 
 uniform mat4 mvp; //Model-view-projection tranformation matrix
 uniform mat4 mv; // Model-view transformation matrix
 uniform mat3 mn; // Inverse transpose model-view transformation matrix
 
-uniform float shininess; //Shininess value
-uniform bool swap; //If true, swap Y-Z axes
 
-varying vec2 texCoord;
 varying vec3 normCoord;
 varying vec4 viewVector;
 
 void main()
 {
-	if (swap){
-		gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y,1);
+	
+	gl_Position = mvp * vec4(vertex_pos,1);
 		
 
-	}
-	else{
-		gl_Position = mvp * vec4(vertex_pos,1);
-		
-
-	}
+	
 	normCoord = mn * normal_pos;
 	viewVector = normalize(-(mv * vec4(vertex_pos,1)));
-	texCoord = texture_pos;
 
 }
 `;
-
-// Fragment shader source code for mesh
 var MeshFS = `
 precision mediump float;
-uniform sampler2D texture_sampler;
-uniform bool use_texture;
 uniform mat4 mvp;
 
-uniform float shininess;
 uniform vec3 lightdir;
-uniform vec3 swapped_lightdir;
-uniform bool swap;
 
-varying vec2 texCoord;
 varying vec3 normCoord;
 
 varying vec4 viewVector;
 
 void main() {
 	vec3 lightdir_;
-	if(swap){
-		lightdir_ = swapped_lightdir;
-	}
-	else{
-		lightdir_ = lightdir;
-	}
+	
+	lightdir_ = lightdir;
+	
 	vec3 intensity = vec3(1.0, 1.0, 1.0);
 	vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
 	float cos_theta = max(0.0, dot(lightdir_, normCoord));
 	float cos_phi = max(0.0, dot(normCoord, h));
-	if(use_texture) {
-		vec3 c = intensity * (cos_theta * vec3(texture2D(texture_sampler, texCoord)) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, shininess));
-		gl_FragColor = vec4(c, 1) + texture2D(texture_sampler, texCoord) * 0.2;
-
-	} else {
-		vec3 c = intensity * (cos_theta * vec3(1.0, 1.0, 1.0) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, shininess));
-		gl_FragColor = vec4(c, 1) + vec4(1.0, 1.0, 1.0, 1.0) * 0.2;
-	}
+	
+	vec3 c = intensity * (cos_theta * vec3(1.0, 1.0, 1.0) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, 1.0));
+	gl_FragColor = vec4(c, 1) + vec4(1.0, 1.0, 1.0, 1.0) * 0.2;
+	
 }
 `;
+// Vertex shader source code for mesh
+*/
+var MeshVS = `
+	attribute vec3 vertex_pos;
+    uniform mat4  mvp;
+	uniform vec3  center;
+	uniform float radius;
+	varying vec3 pos;
+	varying vec3 normCoord;
+	void main()
+	{
+		pos = vertex_pos*radius + center;
+		gl_Position = mvp * vec4(pos,1);
+		normCoord = vertex_pos;
+	}
+`;
+
+
+
+// Fragment shader source code for mesh
+var MeshFS = `
+precision mediump float;
+struct Material {
+	vec3  k_d;	// diffuse coefficient
+	vec3  k_s;	// specular coefficient
+	float n;	// specular exponent
+};
+struct Light {
+	vec3 position;
+	vec3 intensity;
+};
+uniform samplerCube envMap;
+uniform Light    light;
+uniform vec3     campos;
+uniform Material mtl;
+varying vec3     pos;
+varying vec3     normCoord;
+void main()
+{
+	vec3 nrm = normalize(normCoord);
+	vec3 view = normalize( campos - pos );
+	vec3 color = vec3(0,0,0);
+	vec3 L = normalize( light.position - pos );
+	float c = dot( nrm, L );
+	if ( c > 0.0 ) {
+		vec3 clr = c * mtl.k_d;
+		vec3 h = normalize( L + view );
+		float s = dot( nrm, h );
+		if ( s > 0.0 ) {
+			clr += mtl.k_s * pow( s, mtl.n );
+		}
+		color += clr * light.intensity;
+	}
+	if ( mtl.k_s.r + mtl.k_s.g + mtl.k_s.b > 0.0 ) {
+		vec3 dir = reflect( -view, nrm );
+		color += mtl.k_s * textureCube( envMap, dir.xzy ).rgb;
+	}
+	gl_FragColor = vec4(color,1);
+}
+`;
+
