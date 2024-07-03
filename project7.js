@@ -50,15 +50,15 @@ class MeshDrawer
 		this.vertPosShader = gl.getAttribLocation(this.prog, 'vertex_pos');
 
 		// Get the GPU memory position of the texture position attribute from the VS code
-		//this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
+		this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
 
 		// Get the GPU memory position of the normal position attribute from the VS code
-		this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
+		//this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
 
 		// Create the buffer objects
 		this.vertbuffer = gl.createBuffer();
-		//this.texbuffer = gl.createBuffer();
-		this.normalBuffer = gl.createBuffer();
+		this.texbuffer = gl.createBuffer();
+		//this.normalBuffer = gl.createBuffer();
 		this.lightDirBuffer = gl.createBuffer();
 
 		// Length value of vertPos array
@@ -93,11 +93,11 @@ class MeshDrawer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
 
-		//gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
-		//gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+		/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);*/
 	
 	}
 	
@@ -135,10 +135,10 @@ class MeshDrawer
 		gl.vertexAttribPointer(this.vertPosShader, 3, gl.FLOAT, false, 0, 0); //Assign the VS vertex_pos variable to the previous buffer
 		gl.enableVertexAttribArray(this.vertPosShader); //Enable the array to be used as an attribute
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer); //Bind to the vertex buffer
+		/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer); //Bind to the vertex buffer
 		gl.vertexAttribPointer(this.normalsPosShader, 3, gl.FLOAT, false, 0, 0); //Assign the VS vertex_pos variable to the previous buffer
 		gl.enableVertexAttribArray(this.normalsPosShader); //Enable the array to be used as an attribute
-
+*/
 		//Drawing
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
 	}
@@ -173,7 +173,15 @@ class MeshDrawer
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 
 		// Tell the shader we bound the texture to texture unit 0
-		gl.uniform1i(sampler, 0);}
+		gl.uniform1i(sampler, 0);
+	/*
+		var envMap = gl.getUniformLocation(this.prog, "envMap");
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, envMap);
+		gl.uniform1i(gl.getUniformLocation(this.prog, "envMap"), 1);*/
+	
+	
+	}
 	
 	// This method is called when the user changes the state of the
 	// "Show Texture" checkbox. 
@@ -245,7 +253,7 @@ function ComputeSpringDampingForce(pi,pj,d,velocities,damping){
 // It updates the given positions and velocities.
 function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
 {
-	UpdateProjectionMatrix();
+	
 	// [TO-DO] Compute the total force of each particle
 	
 	var forces = Array( positions.length ).fill(0); // The total for per particle
@@ -386,17 +394,24 @@ void main() {
 */
 var MeshVS = `
 	attribute vec3 vertex_pos;
+	attribute vec2 texture_pos; //Texture positions
+
     uniform mat4  mvp;
 	uniform vec3  center;
 	uniform float radius;
 	varying vec3 pos;
 	varying vec3 normCoord;
+	varying vec2 texCoord;
+
 	void main()
 	{
 		pos = vertex_pos*radius + center;
 		gl_Position = mvp * vec4(pos,1);
 		normCoord = vertex_pos;
+		texCoord = texture_pos;
+
 	}
+
 `;
 
 
@@ -404,42 +419,67 @@ var MeshVS = `
 // Fragment shader source code for mesh
 var MeshFS = `
 precision mediump float;
-struct Material {
-	vec3  k_d;	// diffuse coefficient
-	vec3  k_s;	// specular coefficient
-	float n;	// specular exponent
-};
-struct Light {
-	vec3 position;
-	vec3 intensity;
-};
+
+uniform sampler2D texture_sampler;
+uniform bool use_texture;
 uniform samplerCube envMap;
-uniform Light    light;
-uniform vec3     campos;
+
+struct Material {
+    vec3 k_d; // diffuse coefficient
+    vec3 k_s; // specular coefficient
+    float n;  // specular exponent
+};
+
+struct Light {
+    vec3 position;
+    vec3 intensity;
+};
+
+uniform Light light;
+uniform vec3 campos;
 uniform Material mtl;
-varying vec3     pos;
-varying vec3     normCoord;
-void main()
-{
-	vec3 nrm = normalize(normCoord);
-	vec3 view = normalize( campos - pos );
-	vec3 color = vec3(0,0,0);
-	vec3 L = normalize( light.position - pos );
-	float c = dot( nrm, L );
-	if ( c > 0.0 ) {
-		vec3 clr = c * mtl.k_d;
-		vec3 h = normalize( L + view );
-		float s = dot( nrm, h );
-		if ( s > 0.0 ) {
-			clr += mtl.k_s * pow( s, mtl.n );
-		}
-		color += clr * light.intensity;
-	}
-	if ( mtl.k_s.r + mtl.k_s.g + mtl.k_s.b > 0.0 ) {
-		vec3 dir = reflect( -view, nrm );
-		color += mtl.k_s * textureCube( envMap, dir.xzy ).rgb;
-	}
-	gl_FragColor = vec4(color,1);
+
+varying vec3 pos;
+varying vec3 normCoord;
+varying vec2 texCoord;
+
+void main() {
+    vec3 nrm = normalize(normCoord);
+    vec3 view = normalize(campos - pos);
+    vec3 color = vec3(0.0);
+
+    // Light direction
+    vec3 L = normalize(light.position - pos);
+    float c = dot(nrm, L);
+
+    if (c > 0.0) {
+        vec3 diffuse = c * mtl.k_d;
+        vec3 h = normalize(L + view);
+        float s = dot(nrm, h);
+        
+        if (s > 0.0) {
+            diffuse += mtl.k_s * pow(s, mtl.n);
+        }
+        
+        color += diffuse * light.intensity;
+    }
+
+    if (use_texture) {
+        vec3 texColor = texture2D(texture_sampler, texCoord).rgb;
+        vec3 h = normalize(light.position + view);
+        float cos_theta = max(0.0, dot(light.position, normCoord));
+        float cos_phi = max(0.0, dot(normCoord, h));
+        vec3 textureLight = light.intensity * (cos_theta * texColor + vec3(1.0) * pow(cos_phi, 0.5));
+        gl_FragColor = vec4(color, 1.0) + vec4(textureLight, 1.0) * 0.2;
+    } else {
+        if (dot(mtl.k_s, vec3(1.0)) > 0.0) {
+            vec3 dir = reflect(-view, nrm);
+            vec3 envColor = textureCube(envMap, dir.xzy).rgb;
+            color += mtl.k_s * envColor;
+        }
+        gl_FragColor = vec4(color, 1.0);
+    }
 }
+
 `;
 

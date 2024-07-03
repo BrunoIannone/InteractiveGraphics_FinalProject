@@ -193,6 +193,14 @@ var spheres = fixed_spheres.slice();*/
                     img.src = url + files[i];
                 }
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+                //////////////////////BRUNO////////////////////////
+                gl.activeTexture(gl.TEXTURE1);
+
+                // Bind the texture to texture unit 0
+                gl.bindTexture(gl.TEXTURE_2D, environmentTexture);
+                
+                // Tell the shader we bound the texture to texture unit 0
+                gl.uniform1i(sampler, 1);
             }
             function InitWebGL() {
                 // Initialize the WebGL canvas
@@ -308,7 +316,7 @@ var spheres = fixed_spheres.slice();*/
                 //MVP = mvp;
                 // Clear the screen and the depth buffer.
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-                background.draw(trans);
+                //background.draw(trans);
                 if(showBox.checked){
                     boxDrawer.draw(mvp);
 
@@ -431,12 +439,34 @@ var spheres = fixed_spheres.slice();*/
                 DrawScene();
             }
             function MousePos()
+                {
+                return {
+                 x:  ( event.clientX / canvas.clientWidth  ) * 2 - 1,
+                    y: -( event.clientY / canvas.clientHeight ) * 2 + 1
+                }; 
+            }     
+        
+            function ShowTexture( param )
+            {
+                meshDrawer.showTexture( param.checked );
+                DrawScene();
+            }
+        function LoadTexture( param )
 {
-        return {
-            x:  ( event.clientX / canvas.clientWidth  ) * 2 - 1,
-            y: -( event.clientY / canvas.clientHeight ) * 2 + 1
-        };
-}   
+            if ( param.files && param.files[0] ) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = document.getElementById('texture-img');
+                    img.onload = function() {
+                        meshDrawer.setTexture( img );
+                        DrawScene();
+                    }
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL( param.files[0] );
+            }
+}
+
             function UseEnvironmentMap(param) {
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
                 DrawScene();
@@ -5345,7 +5375,10 @@ f 13/958/958 162/959/959 160/960/960
     <div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
     <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
     <div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>
-    </div>
+    <div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
+    <div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)" checked /><label for="show-texture"> Show Texture</label></div>
+
+</div>
 </div>
 </div>
 </div>

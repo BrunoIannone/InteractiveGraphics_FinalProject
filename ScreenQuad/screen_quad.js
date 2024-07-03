@@ -94,7 +94,7 @@ class BackGround
 		gl.depthMask( true );
 	}
 };
-function InitEnvironmentMap()
+/*function InitEnvironmentMap()
 {
 	environmentTexture = gl.createTexture();
 	gl.bindTexture( gl.TEXTURE_CUBE_MAP, environmentTexture );
@@ -135,4 +135,4 @@ function InitEnvironmentMap()
 		img.src = url + files[i];
 	}
 	gl.texParameteri( gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
-}
+}*/
