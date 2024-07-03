@@ -62,3 +62,7 @@ canvas {
 	font-size: 70%;
 	outline: none;
 }
+#texture-img {
+	width: auto;
+	height: 5em;
+}

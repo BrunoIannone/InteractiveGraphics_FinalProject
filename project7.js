@@ -167,13 +167,16 @@ class MeshDrawer
 
 		//Passing the texture to the unit 0
 		var sampler = gl.getUniformLocation(this.prog, "texture_sampler");
+		console.log(sampler);
 		gl.activeTexture(gl.TEXTURE0);
 
 		// Bind the texture to texture unit 0
 		gl.bindTexture(gl.TEXTURE_2D, texture);
-
+		
+		gl.getParameter(gl.TEXTURE_BINDING_2D);
 		// Tell the shader we bound the texture to texture unit 0
 		gl.uniform1i(sampler, 0);
+
 	/*
 		var envMap = gl.getUniformLocation(this.prog, "envMap");
 		gl.activeTexture(gl.TEXTURE1);
@@ -189,6 +192,7 @@ class MeshDrawer
 	showTexture( show )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
+		console.log("QUI",show)
 		gl.useProgram(this.prog);
 		//Assign usetext FS variable the show value
 		var usetext_location = gl.getUniformLocation(this.prog, "use_texture");
@@ -470,7 +474,7 @@ void main() {
         float cos_theta = max(0.0, dot(light.position, normCoord));
         float cos_phi = max(0.0, dot(normCoord, h));
         vec3 textureLight = light.intensity * (cos_theta * texColor + vec3(1.0) * pow(cos_phi, 0.5));
-        gl_FragColor = vec4(color, 1.0) + vec4(textureLight, 1.0) * 0.2;
+        gl_FragColor = vec4(color, 1.0)+ vec4(textureLight, 1.0) * 0.2;
     } else {
         if (dot(mtl.k_s, vec3(1.0)) > 0.0) {
             vec3 dir = reflect(-view, nrm);

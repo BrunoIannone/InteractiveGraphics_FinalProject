@@ -194,13 +194,13 @@ var spheres = fixed_spheres.slice();*/
                 }
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
                 //////////////////////BRUNO////////////////////////
-                gl.activeTexture(gl.TEXTURE1);
+                /*gl.activeTexture(gl.TEXTURE1);
 
                 // Bind the texture to texture unit 0
                 gl.bindTexture(gl.TEXTURE_2D, environmentTexture);
                 
                 // Tell the shader we bound the texture to texture unit 0
-                gl.uniform1i(sampler, 1);
+                gl.uniform1i(sampler, 1);*/
             }
             function InitWebGL() {
                 // Initialize the WebGL canvas
@@ -305,7 +305,11 @@ var spheres = fixed_spheres.slice();*/
 
             function DrawScene() {
                 gl.flush();
-                
+                console.log(document.getElementById('show-texture').param)
+                if(document.getElementById('show-texture').param===undefined){
+                    console.log("si");
+                    massSpring.meshDrawer.showTexture(false);
+                }
                 var trans = GetTrans();
                 //console.log(perspectiveMatrix)
                 //console.log(perspectiveMatrix)
@@ -388,8 +392,10 @@ var spheres = fixed_spheres.slice();*/
 
             window.onload = function () {
                 showBox = document.getElementById('show-box');
+                document.getElementById('show-texture').checked = false;
 
                 InitWebGL();
+
                 canvas.zoom = function (s) {
                     transZ *= s / canvas.height + 1;
                     if (transZ < transZmin) transZ = transZmin;
@@ -448,7 +454,7 @@ var spheres = fixed_spheres.slice();*/
         
             function ShowTexture( param )
             {
-                meshDrawer.showTexture( param.checked );
+                massSpring.meshDrawer.showTexture( param.checked );
                 DrawScene();
             }
         function LoadTexture( param )
@@ -458,7 +464,7 @@ var spheres = fixed_spheres.slice();*/
                 reader.onload = function(e) {
                     var img = document.getElementById('texture-img');
                     img.onload = function() {
-                        meshDrawer.setTexture( img );
+                        massSpring.meshDrawer.setTexture( img );
                         DrawScene();
                     }
                     img.src = e.target.result;
@@ -5356,8 +5362,8 @@ f 13/958/958 162/959/959 160/960/960
 <div id="buttons"><input type="button" value="V" onclick="ShowControls()"/></div>
 <div id="controls">
 <div class="control-group">
-<div class="control"><input id="raster" name="method" type="radio" onchange="DrawScene()" /><label for="raster"> Rasterization</label><br/></div>
-<div class="control"><input id="raytrace" name="method" type="radio" onchange="DrawScene()" checked /><label for="raytrace"> Ray Tracing</label><br/></div>
+<div class="control"><input id="raster" name="method" type="radio" onchange="DrawScene()" checked/><label for="raster"> Rasterization</label><br/></div>
+<div class="control"><input id="raytrace" name="method" type="radio" onchange="DrawScene()"  /><label for="raytrace"> Ray Tracing</label><br/></div>
 <div class="control"><input id="secondary" name="method" type="radio" onchange="DrawScene()" /><label for="secondary"> Rasterization + Ray Tracing</label><br/></div>
 <div class="control"><hr/></div>
 <div class="control"><input id="envmap" name="envmap" type="checkbox" onchange="UseEnvironmentMap(this)" checked /><label for="envmap"> Environment Map</label></div>
@@ -5376,7 +5382,9 @@ f 13/958/958 162/959/959 160/960/960
     <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
     <div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>
     <div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
-    <div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)" checked /><label for="show-texture"> Show Texture</label></div>
+    <div class="control"><img id="texture-img" /></div>
+
+    <div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)"  /><label for="show-texture"> Show Texture</label></div>
 
 </div>
 </div>
