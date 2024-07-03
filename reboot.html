@@ -11,6 +11,7 @@
         <script type="text/javascript" src="project6.js"></script>
         <script type="text/javascript" src="project7.js"></script>
         <script type="text/javascript" src="obj.js"></script>
+        <script type="text/javascript" src="Cube/vertex_selection_color.js"></script>
 
         <script type="text/javascript" src="Arena/arena.js"></script>
         <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
@@ -113,7 +114,7 @@
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox;
-            var massSpring;
+            var massSpring,MVP;
 
             //var spheres;
 
@@ -212,7 +213,7 @@ var spheres = fixed_spheres.slice();*/
                 background = new BackGround(gl);
                 //console.log(gl)
                 
-                sphereDrawer = new SphereDrawer(20,gl);
+                /*sphereDrawer = new SphereDrawer(20,gl);
                 var meshDrawer = new MeshDrawer();
 	            sphereDrawer.setLight( lights[0].position, lights[0].intensity );
                 sphereDrawer.addSphere(new Sphere([ 0, 0, 0 ],1.0,{
@@ -225,15 +226,23 @@ var spheres = fixed_spheres.slice();*/
                     k_s: [ 0.8, 0.8, 0.8 ],
                     n: 100
                     },gl,20,meshDrawer
-                ))
-                
+                ))*/
                 //spheres = sphereDrawer.spheres;
                 primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
 	            secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
                 boxDrawer = new BoxDrawer()
                 UpdateCanvasSize();
-                primaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
-	            secondaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
+                console.log("si")
+                massSpring = new MassSpring(false,"1");
+                SetGravity  ( document.getElementById('gravity') );
+                SetMass     ( document.getElementById('mass') );
+                SetStiffness( document.getElementById('stiffness') );
+                //SetShininess( document.getElementById('shininess-exp') );
+                
+                console.log(["masspsring",massSpring])
+
+                //primaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
+	            //secondaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
                
                 //massSpring = new MassSpring(false,"1",sphereDrawer.spheres[0].triSphere.b.pos)
                 //InitScene();
@@ -267,20 +276,31 @@ var spheres = fixed_spheres.slice();*/
                     0, 0, -(n + f) / (f - n), -1,
                     0, 0, -2 * n * f / (f - n), 0
                 ];
+                //console.log("ene")
+
                 MV = GetModelViewMatrix( 0, transY, transZ, viewRotX, viewRotZ );
+                var trans = GetTrans();
+                MVP = MatrixMult(perspectiveMatrix, trans.worldToCam);
+
+
+                 
                 //screenQuad.init(fov, (n + f) / 2); can be removed
                 background.updateProj(fov, (n + f) / 2);
-                primaryRT.updateProj();
-                secondaryRT.updateProj();
+                //primaryRT.updateProj();
+                //secondaryRT.updateProj();
             }
 
             function DrawScene() {
                 gl.flush();
                 
                 var trans = GetTrans();
-                var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
-                var nrm = [ MV[0],MV[1],MV[2], MV[4],MV[5],MV[6], MV[8],MV[9],MV[10] ];
+                //console.log(perspectiveMatrix)
+                //console.log(perspectiveMatrix)
 
+                var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
+
+                var nrm = [ MV[0],MV[1],MV[2], MV[4],MV[5],MV[6], MV[8],MV[9],MV[10] ];
+                //MVP = mvp;
                 // Clear the screen and the depth buffer.
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 background.draw(trans);
@@ -291,10 +311,12 @@ var spheres = fixed_spheres.slice();*/
                 // Rasterization
                 if ( document.getElementById('raster').checked ) {
                     background.draw( trans );
-                    sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
+                    //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => console.log(["pene",s.triSphere]) );
+                    //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
+                    massSpring.meshDrawer.draw(mvp,MV,nrm);
+                    massSpring.pointDrawer.draw(mvp);
 
-                    sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
                 }
             	
                 // Ray Tracing
@@ -364,6 +386,12 @@ var spheres = fixed_spheres.slice();*/
                 }
                 canvas.onwheel = function () { canvas.zoom(0.3 * event.deltaY); }
                 canvas.onmousedown = function () {
+                    if ( massSpring.mouseDown() ) {
+			            canvas.ondblclick = null;
+			            return;
+		            }
+                    canvas.ondblclick = canvas.resetView;
+
                     var cx = event.clientX;
                     var cy = event.clientY;
                     if (event.ctrlKey) {
@@ -374,7 +402,7 @@ var spheres = fixed_spheres.slice();*/
                     } else {
                         canvas.onmousemove = function () {
                             viewRotZ += (cx - event.clientX) / canvas.width * 5;
-                            console.log(viewRotZ);
+                            //console.log(viewRotZ);
                             viewRotX -= (cy - event.clientY) / canvas.height * 5;
                             cx = event.clientX;
                             cy = event.clientY;
@@ -387,7 +415,8 @@ var spheres = fixed_spheres.slice();*/
                     }
                 }
                 canvas.onmouseup = canvas.onmouseleave = function () {
-                    canvas.onmousemove = null;
+                    massSpring.mouseUp();
+		            canvas.onmousemove = function() { massSpring.mouseMove(); }
                 }
 
                 DrawScene();
@@ -396,6 +425,13 @@ var spheres = fixed_spheres.slice();*/
                 UpdateCanvasSize();
                 DrawScene();
             }
+            function MousePos()
+{
+        return {
+            x:  ( event.clientX / canvas.clientWidth  ) * 2 - 1,
+            y: -( event.clientY / canvas.clientHeight ) * 2 + 1
+        };
+}   
             function UseEnvironmentMap(param) {
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
                 DrawScene();
@@ -423,8 +459,47 @@ function ShowControls()
 	var c = document.getElementById('controls');
 	c.style.display = c.style.display == 'none' ? '' : 'none';
 }
-        </script>
+function SetGravity( param )
+{
+	var v = param.value;
+	var s = v / 20;
+	document.getElementById('gravity-value').innerText = s.toFixed( 2 );
+	massSpring.gravity.y = -s;
+}
 
+function SetMass( param )
+{
+	var v = param.value;
+	var s = v / 200;
+	document.getElementById('mass-value').innerText = s.toFixed( 3 );
+	massSpring.mass = s;
+}
+
+function SetStiffness( param )
+{
+	var v = param.value;
+	var s = v / 20;
+	document.getElementById('stiffness-value').innerText = s.toFixed( 2 );
+	massSpring.stiffness = s;
+}
+
+function SetDamping( param )
+{
+	var v = param.value;
+	var s = v / 20;
+	document.getElementById('damping-value').innerText = s.toFixed( 2 );
+	massSpring.damping = s;
+}
+
+function SetShininess( param )
+{
+	var exp = param.value;
+	var s = Math.pow(10,exp/25);
+	document.getElementById('shininess-value').innerText = s.toFixed( s < 10 ? 2 : 0 );
+	meshDrawer.setShininess(s);
+	DrawScene();
+}
+</script>
 
 <script id="sphereee" type="text/obj">
 	v 0.0 0.5 -2.54558420181
@@ -5252,6 +5327,15 @@ f 13/958/958 162/959/959 160/960/960
 <div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()" checked /><label for="show-box"> Show Box</label></div>
 
 </div>
+<div class="control-group">
+    <div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this)"></div>
+    <div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()"></div>
+    <div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
+    <div class="control"><span id="gravity-label">Gravity:</span><span class="value" id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20" oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()"/></div>
+    <div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
+    <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
+    <div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>
+    </div>
 </div>
 </div>
 </div>

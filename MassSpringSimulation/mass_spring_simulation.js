@@ -6,19 +6,18 @@ class MassSpring {
 
 	constructor(random,label)
 	{
-		
 		this.label = label;
 		this.random = random;
 
-		this.gravity = new Vec3( 0, -2.0, 0 );
+		this.gravity = new Vec3( 0, 2.0, 0 );
 		this.mass = .1;
 		this.stiffness = 1;
 		this.damping = 1;
 		this.restitution = .8;
 		this.meshDrawer = new MeshDrawer();
-		this.setMesh( document.getElementById('box.obj').text );
+		this.setMesh( document.getElementById('sphereee').text );
 		this.pointDrawer = new PointDrawer();
-		this.lightView = new LightView(this.meshDrawer);
+		//this.lightView = new LightView(this.meshDrawer);
 	}
 	setMesh( objdef )
 	{
@@ -48,7 +47,8 @@ class MassSpring {
 		this.mesh.computeNormals();
 		this.reset();
 		this.initSprings();
-		DrawScene();
+		//DrawScene();
+
 	}
 	initSprings()
 	{
