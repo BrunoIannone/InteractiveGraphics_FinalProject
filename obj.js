@@ -79,6 +79,8 @@ class ObjMesh
 	// Returns the bounding box of the object
 	getBoundingBox()
 	{
+
+		//console.log("orig",this.vpos);
 		if ( this.vpos.length == 0 ) return null;
 		var min = [...this.vpos[0]];
 		var max = [...this.vpos[0]];
@@ -86,6 +88,22 @@ class ObjMesh
 			for ( var j=0; j<3; ++j ) {
 				if ( min[j] > this.vpos[i][j] ) min[j] = this.vpos[i][j];
 				if ( max[j] < this.vpos[i][j] ) max[j] = this.vpos[i][j];
+			}
+		}
+		return { min: min, max: max };
+	}
+	updateBoundingBox(vpos)
+	{
+		//console.log(vpos.constructor.name); // Stampa "MyClass"
+
+		//console.log("mia",vpos)
+		if ( vpos.length == 0 ) return null;
+		var min = [...vpos[0]];
+		var max = [...vpos[0]];
+		for ( var i=1; i<vpos.length; ++i ) {
+			for ( var j=0; j<3; ++j ) {
+				if ( min[j] > vpos[i][j] ) min[j] = vpos[i][j];
+				if ( max[j] < vpos[i][j] ) max[j] = vpos[i][j];
 			}
 		}
 		return { min: min, max: max };

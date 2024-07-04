@@ -193,7 +193,7 @@ class MeshDrawer
 	setLightDir_old( x, y, z )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
-		console.log([x,y,z])
+		//console.log([x,y,z])
 		gl.useProgram(this.prog);
 
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
@@ -247,7 +247,6 @@ function ComputeSpringDampingForce(pi,pj,d,velocities,damping){
 // It updates the given positions and velocities.
 function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
 {
-	
 	// [TO-DO] Compute the total force of each particle
 	
 	var forces = Array( positions.length ).fill(0); // The total for per particle
@@ -286,45 +285,54 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 	
 	// [TO-DO] Handle collisions
 	var x0,y0,z0;
+	
 	for (var i=0; i < positions.length;i++){
 		
-		if (positions[i].x<-1.0){
-			x0 = -1.0;
+		if (positions[i].x<-100){
+			
+			/*let scoreElement = document.getElementById("score");
+			let scoreText = scoreElement.innerText;
+			let score = scoreText.split(":");
+			score[1] = parseInt(score[1]) + 1;
+			scoreElement.innerText = score[0] + ": " + score[1];*/
+			
+			
+			x0 = -100;
 			h = x0 - positions[i].x ;
 			positions[i].x = restitution*h + x0;
 			velocities[i].x *= -restitution; 
 		}
 
-		if (positions[i].y<-1.0){
-			y0 = -1.0;
+		if (positions[i].y<-100){
+			y0 = -100;
 			h = y0 - positions[i].y ;
 			positions[i].y = restitution*h + y0;
 			velocities[i].y *= -restitution; 
 		}
 
-		if (positions[i].z<-1.0){
-			z0 = -1.0;
+		if (positions[i].z<-100){
+			z0 = -100;
 			h =  z0 - positions[i].z;
 			positions[i].z = restitution*h + z0;
 			velocities[i].z *= -restitution; 
 		}
 
-		if (positions[i].x>1.0){
-			x0 = 1.0;
+		if (positions[i].x>100){
+			x0 = 100;
 			h = positions[i].x - x0;
 			positions[i].x = x0-restitution*h ;
 			velocities[i].x *= -restitution; 
 		}
 
-		if (positions[i].y>1.0){
-			y0 = 1.0;
+		if (positions[i].y>100){
+			y0 = 100;
 			h = positions[i].y - y0;
 			positions[i].y = y0 - restitution*h ;
 			velocities[i].y *= -restitution; 
 		}
 
-		if (positions[i].z>1.0){
-			z0 = 1.0;
+		if (positions[i].z>100){
+			z0 = 100;
 			h = positions[i].z - z0;
 			positions[i].z = z0 - restitution*h ;
 			velocities[i].z *= -restitution; 

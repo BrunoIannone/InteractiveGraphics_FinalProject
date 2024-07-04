@@ -6,6 +6,7 @@ class MassSpring {
 
 	constructor(random,label)
 	{
+
 		this.label = label;
 		this.random = random;
 
@@ -15,8 +16,11 @@ class MassSpring {
 		this.damping = 1;
 		this.restitution = .8;
 		this.meshDrawer = new MeshDrawer();
+		this.boundingBox = new BoundingBox(gl);
+
 		this.setMesh( document.getElementById('sphereee').text );
 		this.pointDrawer = new PointDrawer();
+
 		//this.lightView = new LightView(this.meshDrawer);
 	}
 	setMesh( objdef )
@@ -24,6 +28,7 @@ class MassSpring {
 		this.mesh = new ObjMesh;
 		this.mesh.parse( objdef );
 		var box = this.mesh.getBoundingBox();
+		//console.log(box)
 		var shift = [
 			-(box.min[0]+box.max[0])/2,
 			-(box.min[1]+box.max[1])/2,
@@ -45,6 +50,10 @@ class MassSpring {
 		var scale = 0.4/maxSize;
 		this.mesh.shiftAndScale( shift, scale );
 		this.mesh.computeNormals();
+		//
+		this.boundingBox.mesh = this.mesh;
+
+		//
 		this.reset();
 		this.initSprings();
 		//DrawScene();
@@ -67,13 +76,17 @@ class MassSpring {
 	{
 		this.pos = Array( this.mesh.vpos.length );
 		for ( var i=0; i<this.pos.length; ++i ) this.pos[i] = ToVec3( this.mesh.vpos[i] );
+		//console.log("vpos",this.mesh.vpos);
+		//console.log("pos",this.pos);
 		this.vel = Array( this.pos.length );
 		for ( var i=0; i<this.vel.length; ++i ) this.vel[i] = new Vec3(0,0,0);
 		this.nrm = Array( this.mesh.norm.length );
 		for ( var i=0; i<this.nrm.length; ++i ) this.nrm[i] = ToVec3( this.mesh.norm[i] );
 		this.buffers = this.mesh.getVertexBuffers();
-		console.log(this.buffers)
+		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		this.boundingBox.createBoundingBox(this.mesh.vpos);
+
 	}
 
 	updateMesh()
@@ -129,13 +142,13 @@ class MassSpring {
 
 		// Update the mesh drawer and redraw scene
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
-
 		this.pointDrawer.updatePoint();
 		DrawScene();
 	}
 
 	simTimeStep()
 	{
+
 		// remember the position of the selected vertex, if any
 		var p = this.holdVert ? this.holdVert.copy() : undefined;
 
@@ -143,17 +156,25 @@ class MassSpring {
 		var timestep = document.getElementById('timestep').value;
 		const dt = timestep / 1000;	// time step in seconds
 		const damping = this.damping * this.stiffness * dt;
+		var pre = [...this.pos];
 		SimTimeStep( dt, this.pos, this.vel, this.springs, this.stiffness, damping, this.mass, this.gravity, this.restitution );
-		
+		var post = [...this.pos]
+		console.log(this.pos);
 		// make sure that the selected vertex does not change position
 		if ( p ) {
 			this.holdVert.set(p);
 			this.vel[ this.selVert ].init(0,0,0);
 		}
+		this.boundingBox.createBoundingBox(this.pos);
+		
 		this.updateMesh();
+
+		//console.log("EELLLE",this.mesh.getBoundingBox());
+
 	}
 	startSimulation()
 	{
+		
 		var timestep = document.getElementById('timestep').value;
 		if ( ! this.isSimulationRunning() ) this.timer = setInterval(() => { this.simTimeStep(); }, timestep);
 	}

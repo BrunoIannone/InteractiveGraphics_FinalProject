@@ -29,6 +29,15 @@ class Vec3 {
 			w: m[3]*this.x + m[7]*this.y + m[11]*this.z + m[15]
 		};
 	}
+	// Adding an iterator
+	*[Symbol.iterator]() {
+		yield this.x;
+		yield this.y;
+		yield this.z;
+	}
+	toArray() {
+        return [this.x, this.y, this.z];
+    }
 }
 
 function ToVec3(a) { return new Vec3(a[0],a[1],a[2]); }

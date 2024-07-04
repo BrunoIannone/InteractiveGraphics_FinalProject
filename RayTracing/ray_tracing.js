@@ -106,7 +106,6 @@ class PrimaryRayTracer extends RayTracer
     }
 	draw( trans )
 	{
-		//console.log(["penee"])
 
 		if ( ! this.prog ) return;
 		this.screenQuad.draw( this.prog, trans );
