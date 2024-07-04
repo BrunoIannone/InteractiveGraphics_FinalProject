@@ -36,8 +36,8 @@ class MeshDrawer
 		//console.log(["MESH",this.prog]);
 		// Get the ids of the uniform variables in the shaders. In this case, the transformation matrix named "mvp","mv","mn"
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
-		//this.mv = gl.getUniformLocation(this.prog, 'mv');
-		//this.mn = gl.getUniformLocation(this.prog, 'mn');
+		this.mv = gl.getUniformLocation(this.prog, 'mv');
+		this.mn = gl.getUniformLocation(this.prog, 'mn');
 		this.mtl_k_d = gl.getUniformLocation( this.prog, 'mtl.k_d' );
 		this.mtl_k_s = gl.getUniformLocation( this.prog, 'mtl.k_s' );
 		this.mtl_n   = gl.getUniformLocation( this.prog, 'mtl.n' );
@@ -45,20 +45,18 @@ class MeshDrawer
 		this.radius  = gl.getUniformLocation( this.prog, 'radius' );
 		this.campos  = gl.getUniformLocation( this.prog, 'campos' );
 
-
 		// Get the GPU memory position of the vertex position attribute from the VS code
 		this.vertPosShader = gl.getAttribLocation(this.prog, 'vertex_pos');
 
 		// Get the GPU memory position of the texture position attribute from the VS code
 		this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
-
 		// Get the GPU memory position of the normal position attribute from the VS code
-		//this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
+		this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
 
 		// Create the buffer objects
 		this.vertbuffer = gl.createBuffer();
 		this.texbuffer = gl.createBuffer();
-		//this.normalBuffer = gl.createBuffer();
+		this.normalBuffer = gl.createBuffer();
 		this.lightDirBuffer = gl.createBuffer();
 
 		// Length value of vertPos array
@@ -85,6 +83,7 @@ class MeshDrawer
 	// Note that this method can be called multiple times.
 	setMesh( vertPos, texCoords, normals )
 	{
+		//console.log("IO",normals)
 		// [TO-DO] Update the contents of the vertex buffer objects.
 		// [TO-DO] Update the contents of the vertex buffer objects.
 		this.vertPoslength = vertPos.length; // Storing this information is important for drawing step
@@ -96,8 +95,8 @@ class MeshDrawer
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 
-		/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);*/
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
 	
 	}
 	
@@ -126,8 +125,8 @@ class MeshDrawer
 		gl.useProgram(this.prog);
 
 		gl.uniformMatrix4fv(this.mvp, false, matrixMVP); //Assign to mvp matrix, matrixMVP matrix (function input)
-		//gl.uniformMatrix4fv(this.mv, false, matrixMV); //Assign to mv matrix, matrixMV matrix (function input)
-		//gl.uniformMatrix3fv(this.mn, false, matrixNormal); //Assign to mn matrix, matrixNormal matrix (function input)
+		gl.uniformMatrix4fv(this.mv, false, matrixMV); //Assign to mv matrix, matrixMV matrix (function input)
+	    gl.uniformMatrix3fv(this.mn, false, matrixNormal); //Assign to mn matrix, matrixNormal matrix (function input)
 		gl.uniform3fv( this.campos, campos );
 
 		//Enable triangle drawing from vertPosShader and normalsPosShader array
@@ -135,56 +134,47 @@ class MeshDrawer
 		gl.vertexAttribPointer(this.vertPosShader, 3, gl.FLOAT, false, 0, 0); //Assign the VS vertex_pos variable to the previous buffer
 		gl.enableVertexAttribArray(this.vertPosShader); //Enable the array to be used as an attribute
 
-		/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer); //Bind to the vertex buffer
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer); //Bind to the vertex buffer
 		gl.vertexAttribPointer(this.normalsPosShader, 3, gl.FLOAT, false, 0, 0); //Assign the VS vertex_pos variable to the previous buffer
 		gl.enableVertexAttribArray(this.normalsPosShader); //Enable the array to be used as an attribute
-*/
+
 		//Drawing
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
 	}
 	
 	// This method is called to set the texture of the mesh.
 	// The argument is an HTML IMG element containing the texture data.
-	setTexture( img )
-	{
-		// [TO-DO] Bind the texture
+	setTexture(img) {
+		console.log(img);
+    // Usa il programma shader
+    gl.useProgram(this.prog);
 
-		const texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
+    // Creazione e binding della texture 2D
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
 
-		// You can set the texture image data using the following command.
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+    // Imposta i parametri della texture 2D e carica l'immagine
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-		gl.generateMipmap(gl.TEXTURE_2D)
+    // Assegna i buffer delle coordinate texture
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
+    gl.vertexAttribPointer(this.texPosShader, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(this.texPosShader);
 
-		// [TO-DO] Now that we have a texture, it might be a good idea to set
-		// some uniform parameter(s) of the fragment shader, so that it uses the texture.
+    // Passaggio della texture 2D all'unità di texture 0
+    const textureSampler = gl.getUniformLocation(this.prog, "texture_sampler");
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(textureSampler, 0);
 
-		gl.useProgram(this.prog);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
-		gl.vertexAttribPointer(this.texPosShader, 2, gl.FLOAT, false, 0, 0); //Assign the VS texture_pos variable to the previous buffer
-		gl.enableVertexAttribArray(this.texPosShader);//Enable the array to be used as an attribute
+    
 
-		//Passing the texture to the unit 0
-		var sampler = gl.getUniformLocation(this.prog, "texture_sampler");
-		console.log(sampler);
-		gl.activeTexture(gl.TEXTURE0);
 
-		// Bind the texture to texture unit 0
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-		
-		gl.getParameter(gl.TEXTURE_BINDING_2D);
-		// Tell the shader we bound the texture to texture unit 0
-		gl.uniform1i(sampler, 0);
+}
 
-	/*
-		var envMap = gl.getUniformLocation(this.prog, "envMap");
-		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, envMap);
-		gl.uniform1i(gl.getUniformLocation(this.prog, "envMap"), 1);*/
-	
-	
-	}
 	
 	// This method is called when the user changes the state of the
 	// "Show Texture" checkbox. 
@@ -192,7 +182,7 @@ class MeshDrawer
 	showTexture( show )
 	{
 		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
-		console.log("QUI",show)
+		//console.log("QUI",show)
 		gl.useProgram(this.prog);
 		//Assign usetext FS variable the show value
 		var usetext_location = gl.getUniformLocation(this.prog, "use_texture");
@@ -341,62 +331,8 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 		}
 	}
 }
+
 /*var MeshVS = `
-precision mediump float;
-
-attribute vec3 vertex_pos; //Vertex positions
-attribute vec3 normal_pos; //Normals positions
-
-uniform vec3 lightdir; //Light direction
-
-uniform mat4 mvp; //Model-view-projection tranformation matrix
-uniform mat4 mv; // Model-view transformation matrix
-uniform mat3 mn; // Inverse transpose model-view transformation matrix
-
-
-varying vec3 normCoord;
-varying vec4 viewVector;
-
-void main()
-{
-	
-	gl_Position = mvp * vec4(vertex_pos,1);
-		
-
-	
-	normCoord = mn * normal_pos;
-	viewVector = normalize(-(mv * vec4(vertex_pos,1)));
-
-}
-`;
-var MeshFS = `
-precision mediump float;
-uniform mat4 mvp;
-
-uniform vec3 lightdir;
-
-varying vec3 normCoord;
-
-varying vec4 viewVector;
-
-void main() {
-	vec3 lightdir_;
-	
-	lightdir_ = lightdir;
-	
-	vec3 intensity = vec3(1.0, 1.0, 1.0);
-	vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
-	float cos_theta = max(0.0, dot(lightdir_, normCoord));
-	float cos_phi = max(0.0, dot(normCoord, h));
-	
-	vec3 c = intensity * (cos_theta * vec3(1.0, 1.0, 1.0) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, 1.0));
-	gl_FragColor = vec4(c, 1) + vec4(1.0, 1.0, 1.0, 1.0) * 0.2;
-	
-}
-`;
-// Vertex shader source code for mesh
-*/
-var MeshVS = `
 	attribute vec3 vertex_pos;
 	attribute vec2 texture_pos; //Texture positions
 
@@ -426,7 +362,7 @@ precision mediump float;
 
 uniform sampler2D texture_sampler;
 uniform bool use_texture;
-uniform samplerCube envMap;
+//uniform samplerCube envMap;
 
 struct Material {
     vec3 k_d; // diffuse coefficient
@@ -467,23 +403,116 @@ void main() {
         
         color += diffuse * light.intensity;
     }
-
-    if (use_texture) {
+	if (use_texture == false) {
+        // Color for debugging: red means is false
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        return;
+    } /*else {
+        // Color for debugging: green means is true
+        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        return;
+    }
+    if (use_texture==true) {
         vec3 texColor = texture2D(texture_sampler, texCoord).rgb;
         vec3 h = normalize(light.position + view);
         float cos_theta = max(0.0, dot(light.position, normCoord));
         float cos_phi = max(0.0, dot(normCoord, h));
         vec3 textureLight = light.intensity * (cos_theta * texColor + vec3(1.0) * pow(cos_phi, 0.5));
         gl_FragColor = vec4(color, 1.0)+ vec4(textureLight, 1.0) * 0.2;
-    } else {
+		return;
+    } /*else {
         if (dot(mtl.k_s, vec3(1.0)) > 0.0) {
             vec3 dir = reflect(-view, nrm);
             vec3 envColor = textureCube(envMap, dir.xzy).rgb;
             color += mtl.k_s * envColor;
+			gl_FragColor = vec4(color, 1.0);
+			return;
         }
-        gl_FragColor = vec4(color, 1.0);
+       
     }
+	else{
+		gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+
+	}
 }
 
+`;*/
+var MeshVS = `
+precision mediump float;
+
+attribute vec3 vertex_pos; //Vertex positions
+attribute vec2 texture_pos; //Texture positions
+attribute vec3 normal_pos; //Normals positions
+
+uniform vec3 lightdir; //Light direction
+//uniform vec3 swapped_lightdir; //Light direction when swap is true
+
+uniform mat4 mvp; //Model-view-projection tranformation matrix
+uniform mat4 mv; // Model-view transformation matrix
+uniform mat3 mn; // Inverse transpose model-view transformation matrix
+
+//uniform float shininess; //Shininess value
+//uniform bool swap; //If true, swap Y-Z axes
+
+varying vec2 texCoord;
+varying vec3 normCoord;
+varying vec4 viewVector;
+
+void main()
+{
+	/*if (swap){
+		gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y,1);
+		
+
+	}
+	else{*/
+		gl_Position = mvp * vec4(vertex_pos,1);
+		
+
+	//}
+	normCoord =  normal_pos;
+	viewVector = normalize(-(mv * vec4(vertex_pos,1)));
+	texCoord = texture_pos;
+
+}
 `;
 
+// Fragment shader source code for mesh
+var MeshFS = `
+precision mediump float;
+uniform sampler2D texture_sampler;
+uniform bool use_texture;
+uniform mat4 mvp;
+
+//uniform float shininess;
+uniform vec3 lightdir;
+//uniform vec3 swapped_lightdir;
+//uniform bool swap;
+
+varying vec2 texCoord;
+varying vec3 normCoord;
+
+varying vec4 viewVector;
+
+void main() {
+	vec3 lightdir_;
+	/*if(swap){
+		lightdir_ = swapped_lightdir;
+	}
+	else{*/
+		lightdir_ = lightdir;
+	//}
+	vec3 intensity = vec3(1.0, 1.0, 1.0);
+	vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
+	float cos_theta = max(0.0, dot(lightdir_, normCoord));
+	float cos_phi = max(0.0, dot(normCoord, h));
+	if(use_texture) {
+		vec3 c = intensity * (cos_theta * vec3(texture2D(texture_sampler, texCoord)) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, 0.5));
+		gl_FragColor = vec4(c, 1) + texture2D(texture_sampler, texCoord) * 0.2;
+
+	} else {
+		vec3 c = intensity * (cos_theta * vec3(1.0, 1.0, 1.0) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, 0.5));
+		gl_FragColor = vec4(c, 1) + vec4(1.0, 0,0, 0) * 0.2;
+	}
+}
+`;
