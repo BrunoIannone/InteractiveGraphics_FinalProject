@@ -72,6 +72,7 @@ class MassSpring {
 		this.nrm = Array( this.mesh.norm.length );
 		for ( var i=0; i<this.nrm.length; ++i ) this.nrm[i] = ToVec3( this.mesh.norm[i] );
 		this.buffers = this.mesh.getVertexBuffers();
+		console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
 	}
 
