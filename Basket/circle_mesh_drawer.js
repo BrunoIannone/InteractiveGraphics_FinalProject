@@ -226,228 +226,6 @@ class CircleMeshDrawer
 	}
 }
 
-//Compute spring linear force for a couple of particles pi,pj
-function ComputeLinearSpringForce(pi,pj,rest,d,positions,stiffness)
-{
-	
-	var spring_length = (positions[pj].sub(positions[pi])).len(); //Compute spring length
-	return d.mul(stiffness * (spring_length - rest));
-
-}
-
-//Compute spring damping force for a couple of particles pi,pj
-function ComputeSpringDampingForce(pi,pj,d,velocities,damping){
-	var v1 = velocities[pj]; //Particle i velocity
-	var v0 = velocities[pi]; //Particle j velocity
-	var l_dot = d.dot(v1.sub(v0)); //Length derivative
-	
-	return d.mul(damping*l_dot);
-}
-
-
-// This function is called for every step of the simulation.
-// Its job is to advance the simulation for the given time step duration dt.
-// It updates the given positions and velocities.
-function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
-{
-	// [TO-DO] Compute the total force of each particle
-	
-	var forces = Array( positions.length ).fill(0); // The total for per particle
-	
-	//Gravity force computation for each particle
-	for (var i = 0; i < positions.length; i++ ){
-		forces[i] = gravity.mul(particleMass);
-	}
-
-	//Compute spring forces
-	for (var i = 0; i < springs.length; i++){
-		var pi = springs[i].p0; //Particle i
-		var pj = springs[i].p1; //Particle j
-		var rest = springs[i].rest; //Spring Length at rest
-		var d = positions[pj].sub(positions[pi]).unit(); //d unitary vector computation
-
-		fi_s =  ComputeLinearSpringForce(pi,pj,rest,d,positions,stiffness);
-		fi_d =  ComputeSpringDampingForce(pi,pj,d,velocities,damping);
-
-		//Update total forces for particle i and j
-		forces[pi].inc(fi_s.add(fi_d));
-		forces[pj].dec(fi_s.add(fi_d));
-
-	}
-
-	// [TO-DO] Update positions and velocities
-
-	//These updates follow the "Semi-implicit Euler integration"
-	var a;
-	for (var i = 0; i< positions.length; i++){
-		a = forces[i].div(particleMass);
-		velocities[i].inc(a.mul(dt));
-		positions[i].inc(velocities[i].mul(dt));
-	}
-	
-	
-	// [TO-DO] Handle collisions
-	var x0,y0,z0;
-	
-	for (var i=0; i < positions.length;i++){
-		
-		if (positions[i].x<-5){
-			
-			/*let scoreElement = document.getElementById("score");
-			let scoreText = scoreElement.innerText;
-			let score = scoreText.split(":");
-			score[5] = parseInt(score[5]) + 5;
-			scoreElement.innerText = score[0] + ": " + score[5];*/
-			
-			
-			x0 = -5;
-			h = x0 - positions[i].x ;
-			positions[i].x = restitution*h + x0;
-			velocities[i].x *= -restitution; 
-		}
-
-		if (positions[i].y<-5){
-			y0 = -5;
-			h = y0 - positions[i].y ;
-			positions[i].y = restitution*h + y0;
-			velocities[i].y *= -restitution; 
-		}
-
-		if (positions[i].z<-5){
-			z0 = -5;
-			h =  z0 - positions[i].z;
-			positions[i].z = restitution*h + z0;
-			velocities[i].z *= -restitution; 
-		}
-
-		if (positions[i].x>5){
-			x0 = 5;
-			h = positions[i].x - x0;
-			positions[i].x = x0-restitution*h ;
-			velocities[i].x *= -restitution; 
-		}
-
-		if (positions[i].y>5){
-			y0 = 5;
-			h = positions[i].y - y0;
-			positions[i].y = y0 - restitution*h ;
-			velocities[i].y *= -restitution; 
-		}
-
-		if (positions[i].z>5){
-			z0 = 5;
-			h = positions[i].z - z0;
-			positions[i].z = z0 - restitution*h ;
-			velocities[i].z *= -restitution; 
-		}
-	}
-}
-
-/*var MeshVS = `
-	attribute vec3 vertex_pos;
-	attribute vec2 texture_pos; //Texture positions
-
-    uniform mat4  mvp;
-	uniform vec3  center;
-	uniform float radius;
-	varying vec3 pos;
-	varying vec3 normCoord;
-	varying vec2 texCoord;
-
-	void main()
-	{
-		pos = vertex_pos*radius + center;
-		gl_Position = mvp * vec4(pos,1);
-		normCoord = vertex_pos;
-		texCoord = texture_pos;
-
-	}
-
-`;
-
-
-
-// Fragment shader source code for mesh
-var MeshFS = `
-precision mediump float;
-
-uniform sampler2D texture_sampler;
-uniform bool use_texture;
-//uniform samplerCube envMap;
-
-struct Material {
-    vec3 k_d; // diffuse coefficient
-    vec3 k_s; // specular coefficient
-    float n;  // specular exponent
-};
-
-struct Light {
-    vec3 position;
-    vec3 intensity;
-};
-
-uniform Light light;
-uniform vec3 campos;
-uniform Material mtl;
-
-varying vec3 pos;
-varying vec3 normCoord;
-varying vec2 texCoord;
-
-void main() {
-    vec3 nrm = normalize(normCoord);
-    vec3 view = normalize(campos - pos);
-    vec3 color = vec3(0.0);
-
-    // Light direction
-    vec3 L = normalize(light.position - pos);
-    float c = dot(nrm, L);
-
-    if (c > 0.0) {
-        vec3 diffuse = c * mtl.k_d;
-        vec3 h = normalize(L + view);
-        float s = dot(nrm, h);
-        
-        if (s > 0.0) {
-            diffuse += mtl.k_s * pow(s, mtl.n);
-        }
-        
-        color += diffuse * light.intensity;
-    }
-	if (use_texture == false) {
-        // Color for debugging: red means is false
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        return;
-    } /*else {
-        // Color for debugging: green means is true
-        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-        return;
-    }
-    if (use_texture==true) {
-        vec3 texColor = texture2D(texture_sampler, texCoord).rgb;
-        vec3 h = normalize(light.position + view);
-        float cos_theta = max(0.0, dot(light.position, normCoord));
-        float cos_phi = max(0.0, dot(normCoord, h));
-        vec3 textureLight = light.intensity * (cos_theta * texColor + vec3(1.0) * pow(cos_phi, 0.5));
-        gl_FragColor = vec4(color, 1.0)+ vec4(textureLight, 1.0) * 0.2;
-		return;
-    } /*else {
-        if (dot(mtl.k_s, vec3(1.0)) > 0.0) {
-            vec3 dir = reflect(-view, nrm);
-            vec3 envColor = textureCube(envMap, dir.xzy).rgb;
-            color += mtl.k_s * envColor;
-			gl_FragColor = vec4(color, 1.0);
-			return;
-        }
-       
-    }
-	else{
-		gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-
-	}
-}
-
-`;*/
 var CircleMeshVS = `
 precision mediump float;
 
@@ -510,7 +288,16 @@ struct Material {
 uniform Material mtl;
 
 varying vec4 viewVector;
+vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl);
+// Blinn Shading function
+vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl){
 
+			vec3 h = normalize(light_dir + view);
+			float cos_theta = max(0.0, dot(light_dir, normal));
+			float cos_phi = max(0.0, dot(normal, h));
+			vec3 c = intensity * (cos_theta * mtl.k_d + mtl.k_s * pow(cos_phi, mtl.n));
+			return c;
+}
 void main() {
 	vec3 lightdir_;
 	/*if(swap){
@@ -520,7 +307,7 @@ void main() {
 		lightdir_ = lightdir;
 	//}
 	vec3 intensity = vec3(1.0, 1.0, 1.0);
-	vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
+	/*vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
 	float cos_theta = max(0.0, dot(lightdir_, normCoord));
 	float cos_phi = max(0.0, dot(normCoord, h));
 	if(use_texture) {
@@ -531,7 +318,9 @@ void main() {
 		vec3 c = intensity * (cos_theta * mtl.k_d + mtl.k_s * pow(cos_phi, mtl.n));
 		gl_FragColor = vec4(c, 1);// + vec4(1.0, 1,0, 1.0) * 0.2;
 	}
-    //gl_FragColor = vec4(1.0, 0, 1.0,1.0);
+    //gl_FragColor = vec4(1.0, 0, 1.0,1.0);*/
+	gl_FragColor = vec4(BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normCoord,  intensity, mtl),1);
+
 
 }
 `;

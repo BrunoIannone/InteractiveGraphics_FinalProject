@@ -247,8 +247,9 @@ function ComputeSpringDampingForce(pi,pj,d,velocities,damping){
 // It updates the given positions and velocities.
 function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution )
 {
-	// [TO-DO] Compute the total force of each particle
 	
+	// [TO-DO] Compute the total force of each particle
+
 	var forces = Array( positions.length ).fill(0); // The total for per particle
 	
 	//Gravity force computation for each particle
@@ -290,11 +291,11 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 		
 		if (positions[i].x<-5){
 			
-			/*let scoreElement = document.getElementById("score");
+			let scoreElement = document.getElementById("score");
 			let scoreText = scoreElement.innerText;
 			let score = scoreText.split(":");
-			score[5] = parseInt(score[5]) + 5;
-			scoreElement.innerText = score[0] + ": " + score[5];*/
+			score[1] = parseInt(score[1]) + 5;
+			scoreElement.innerText = score[0] + ": " + score[1];
 			
 			
 			x0 = -5;
@@ -338,6 +339,7 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 			velocities[i].z *= -restitution; 
 		}
 	}
+return ("penis")
 }
 
 /*var MeshVS = `

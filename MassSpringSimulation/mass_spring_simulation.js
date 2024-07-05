@@ -85,6 +85,7 @@ class MassSpring {
 		this.buffers = this.mesh.getVertexBuffers();
 		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		
 		this.boundingBox.createBoundingBox(this.mesh.vpos);
 
 	}
@@ -157,9 +158,12 @@ class MassSpring {
 		const dt = timestep / 1000;	// time step in seconds
 		const damping = this.damping * this.stiffness * dt;
 		var pre = [...this.pos];
+		//console.log("prima")
 		SimTimeStep( dt, this.pos, this.vel, this.springs, this.stiffness, damping, this.mass, this.gravity, this.restitution );
+		//console.log("fuori")
+
 		var post = [...this.pos]
-		console.log(this.pos);
+		//console.log(this.pos);
 		// make sure that the selected vertex does not change position
 		if ( p ) {
 			this.holdVert.set(p);
@@ -191,7 +195,7 @@ class MassSpring {
 			this.stopSimulation();
 			btn.value = "Start Simulation";
 		} else {
-			console.log(this.label)
+			//console.log(this.label)
 			this.startSimulation();
 			btn.value = "Stop Simulation";
 		}
