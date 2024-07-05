@@ -122,7 +122,7 @@
             const transZmax = 10;
             var canvas, gl, background, perspectiveMatrix;
             var sphereDrawer,circle,table,net;//,triSphere;
-            var environmentTexture;
+            //var environmentTexture;
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox;
@@ -164,7 +164,7 @@ var spheres = fixed_spheres.slice();*/
         <!-- --------- -->
 
         <script>
-            function InitEnvironmentMap() {
+            /*function InitEnvironmentMap() {
                 environmentTexture = gl.createTexture();
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, environmentTexture);
 
@@ -205,7 +205,7 @@ var spheres = fixed_spheres.slice();*/
                 }
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
                 
-            }
+            }*/
             function InitWebGL() {
                 // Initialize the WebGL canvas
                 canvas = document.getElementById("canvas");
@@ -220,10 +220,12 @@ var spheres = fixed_spheres.slice();*/
                 gl.clearColor(0, 0, 0, 0);
                 gl.enable(gl.DEPTH_TEST);
                 
-
-                InitEnvironmentMap();
-                //triSphere = new TriSphereClass(20,gl);
                 background = new BackGround(gl);
+
+                UpdateCanvasSize();
+                background.InitEnvironmentMap();
+                //InitEnvironmentMap();
+                //triSphere = new TriSphereClass(20,gl);
                 //console.log(gl)
                 
                 /*sphereDrawer = new SphereDrawer(20,gl);
@@ -244,8 +246,9 @@ var spheres = fixed_spheres.slice();*/
                 //primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
 	            
                 //secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
+                
+
                 boxDrawer = new BoxDrawer()
-                UpdateCanvasSize();
                 //console.log("si")
                 massSpring = new MassSpring(true,"1");
                 //console.log(lights.position)
@@ -279,6 +282,7 @@ var spheres = fixed_spheres.slice();*/
                
                 //massSpring = new MassSpring(false,"1",sphereDrawer.spheres[0].triSphere.b.pos)
                 //InitScene();
+                DrawScene();
             }
             function UpdateCanvasSize() {
                 canvas.style.width = "100%";
@@ -318,7 +322,9 @@ var spheres = fixed_spheres.slice();*/
 
                  
                 //screenQuad.init(fov, (n + f) / 2); can be removed
+                if(background){
                 background.updateProj(fov, (n + f) / 2);
+                }
                 //primaryRT.updateProj();
                 //secondaryRT.updateProj();
             }
@@ -332,7 +338,6 @@ var spheres = fixed_spheres.slice();*/
                 }*/
                 var trans = GetTrans();
                 //console.log(perspectiveMatrix)
-                //console.log(perspectiveMatrix)
 
                 var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
 
@@ -340,14 +345,16 @@ var spheres = fixed_spheres.slice();*/
                 //MVP = mvp;
                 // Clear the screen and the depth buffer.
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-                background.draw(trans);
+                if(background){
+                    background.draw( trans );
+                    }
                 if(showBox.checked){
                     boxDrawer.draw(mvp);
 
                 }
                 // Rasterization
                 if ( document.getElementById('raster').checked ) {
-                    background.draw( trans );
+                    
                     //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
                     //massSpring.boundingBox.draw(mvp);
@@ -418,7 +425,6 @@ var spheres = fixed_spheres.slice();*/
             window.onload = function () {
                 showBox = document.getElementById('show-box');
                 document.getElementById('show-texture').checked = false;
-
                 InitWebGL();
 
                 canvas.zoom = function (s) {
@@ -527,8 +533,9 @@ var spheres = fixed_spheres.slice();*/
 
             function UseEnvironmentMap(param) {
 
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
-                DrawScene();
+                /*gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
+                DrawScene();*/
+                console.log("UseEnvironmentMap")
             }
             function IncBounceLimit( inc )
 {

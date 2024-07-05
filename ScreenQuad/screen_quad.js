@@ -1,5 +1,5 @@
 
-function InitShaderProgramFromScripts( vs, fs )
+/*function InitShaderProgramFromScripts( vs, fs )
 {
 	return InitShaderProgram( document.getElementById(vs).text, document.getElementById(fs).text );	
 }
@@ -36,7 +36,7 @@ function CompileShader( type, source )
 		return null;
 	}
 	return shader;
-}
+}*/
 class ScreenQuad{
 
 	constructor(gl)
@@ -78,7 +78,9 @@ class BackGround
 	constructor(gl)
 	{
 		this.gl = gl
-		this.prog = InitShaderProgramFromScripts( 'raytraceVS', 'envFS' );
+		//this.InitEnvironmentMap()
+
+		this.prog = InitShaderProgram( BackVS, BackFS );
 		this.screenQuad = new ScreenQuad(this.gl)
 	}
 	updateProj(fov,z)
@@ -93,46 +95,82 @@ class BackGround
 		this.screenQuad.draw( this.prog, trans );
 		gl.depthMask( true );
 	}
-};
-/*function InitEnvironmentMap()
-{
-	environmentTexture = gl.createTexture();
-	gl.bindTexture( gl.TEXTURE_CUBE_MAP, environmentTexture );
-	
-	const url = 'http://localhost:3000/';
-	const files = [
-	  'px.png',
-	  'nx.png',
-	  'py.png',
-	  'ny.png',
-	  'pz.png',
-	  'nz.png',
-	];
-	const faces = [
-		gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-		gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-		gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-		gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-		gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-		gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-	];
-
-	var loaded = 0;
-	for ( var i=0; i<6; ++i ) {
-		gl.texImage2D( faces[i], 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
-		const img = new Image();
-		img.crossOrigin = "anonymous";
-		img.face = faces[i];
-		img.onload = function() {
+	InitEnvironmentMap()
+		{
+			gl.useProgram(this.prog);
+			var environmentTexture = gl.createTexture();
 			gl.bindTexture( gl.TEXTURE_CUBE_MAP, environmentTexture );
-			gl.texImage2D( this.face, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this );
-			loaded++;
-			if ( loaded == 6 ) {
-				gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-				DrawScene();
+			
+			const url = 'http://localhost:3000/';
+			const files = [
+			'assets/px.png',
+			'assets/nx.png',
+			'assets/py.png',
+			'assets/ny.png',
+			'assets/pz.png',
+			'assets/nz.png',
+			];
+			const faces = [
+				gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+				gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+				gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+				gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+				gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+				gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+			];
+
+			var loaded = 0;
+			for ( var i=0; i<6; ++i ) {
+				gl.texImage2D( faces[i], 0, gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
+				const img = new Image();
+				img.crossOrigin = "anonymous";
+				img.face = faces[i];
+				img.onload = function() {
+					gl.bindTexture( gl.TEXTURE_CUBE_MAP, environmentTexture );
+					gl.texImage2D( this.face, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this );
+					loaded++;
+					if ( loaded == 6 ) {
+						gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+						//DrawScene();
+					}
+				};
+				img.src = url + files[i];
 			}
-		};
-		img.src = url + files[i];
+			gl.texParameteri( gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+			const textureSampler = gl.getUniformLocation(this.prog, "envMap");
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_CUBE_MAP, environmentTexture);
+			gl.uniform1i(textureSampler, 0);
+		}
+};
+
+
+BackVS = 
+
+		`
+		precision mediump float;
+		attribute vec3 p;
+		uniform mat4 proj;
+		uniform mat4 c2w; //camera to world
+		varying vec3 ray_pos;
+		varying vec3 ray_dir;
+		void main()
+		{
+			gl_Position = proj * vec4(p,1);
+			vec4 rp = c2w * vec4(0,0,0,1);
+			ray_pos = rp.xyz;
+			vec4 rd = c2w * vec4(p,1);
+			ray_dir = rd.xyz - ray_pos;
+		}`;
+
+
+BackFS = 
+`
+	precision mediump float;
+	varying vec3 ray_dir;
+	uniform samplerCube envMap;
+	void main()
+	{
+		gl_FragColor = textureCube( envMap, ray_dir.xzy );
 	}
-	gl.texParameteri( gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
-}*/
+	`;
