@@ -115,7 +115,12 @@ class TableMeshDrawer
 		var swap_location = gl.getUniformLocation(this.prog, 'swap');
 		gl.uniform1i(swap_location, swap);
 	}
-	
+	setTrans( campos )
+	{
+		gl.useProgram(this.prog);
+
+		gl.uniform3fv( this.campos, campos );
+	}
 	// This method is called to draw the triangular mesh.
 	// The arguments are the model-view-projection transformation matrixMVP,
 	// the model-view transformation matrixMV, the same matrix returned
@@ -141,8 +146,19 @@ class TableMeshDrawer
 		gl.vertexAttribPointer(this.normalsPosShader, 3, gl.FLOAT, false, 0, 0); //Assign the VS vertex_pos variable to the previous buffer
 		gl.enableVertexAttribArray(this.normalsPosShader); //Enable the array to be used as an attribute
 
+	
+		const textureSampler = gl.getUniformLocation(this.prog, "envMap");
+		gl.activeTexture(gl.TEXTURE0);
+		
+		gl.uniform1i(textureSampler, 0);
+	
+	
+	
 		//Drawing
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
+	
+	
+	
 	}
 	
 	// This method is called to set the texture of the mesh.
@@ -239,13 +255,16 @@ uniform vec3 lightdir; //Light direction
 uniform mat4 mvp; //Model-view-projection tranformation matrix
 uniform mat4 mv; // Model-view transformation matrix
 uniform mat3 mn; // Inverse transpose model-view transformation matrix
+uniform vec3 campos;
 
 //uniform float shininess; //Shininess value
 //uniform bool swap; //If true, swap Y-Z axes
 
 varying vec2 texCoord;
 varying vec3 normCoord;
-varying vec4 viewVector;
+varying vec3 viewVector;
+varying vec3 vertexPos;
+
 
 void main()
 {
@@ -260,8 +279,9 @@ void main()
 
 	//}
 	normCoord =  normal_pos;
-	viewVector = normalize(-(mv * vec4(vertex_pos,1)));
+	viewVector = normalize(campos - vertex_pos);
 	texCoord = texture_pos;
+	vertexPos = vertex_pos;
 
 }
 `;
@@ -271,6 +291,9 @@ var TableMeshFS = `
 precision mediump float;
 uniform sampler2D texture_sampler;
 uniform bool use_texture;
+uniform samplerCube envMap;
+uniform vec3 campos;
+
 uniform mat4 mvp;
 
 //uniform float shininess;
@@ -280,6 +303,7 @@ uniform vec3 lightdir;
 
 varying vec2 texCoord;
 varying vec3 normCoord;
+varying vec3 vertexPos;
 struct Material {
     vec3  k_d;	// diffuse coefficient
     vec3  k_s;	// specular coefficient
@@ -287,7 +311,7 @@ struct Material {
 };
 uniform Material mtl;
 
-varying vec4 viewVector;
+varying vec3 viewVector;
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl);
 // Blinn Shading function
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl){
@@ -300,27 +324,17 @@ vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material m
 }
 void main() {
 	vec3 lightdir_;
-	/*if(swap){
-		lightdir_ = swapped_lightdir;
-	}
-	else{*/
-		lightdir_ = lightdir;
-	//}
+	
+		lightdir_ = lightdir - vertexPos;
 	vec3 intensity = vec3(1.0, 1.0, 1.0);
-	/*vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
-	float cos_theta = max(0.0, dot(lightdir_, normCoord));
-	float cos_phi = max(0.0, dot(normCoord, h));
-	if(use_texture) {
-		vec3 c = intensity * (cos_theta * vec3(texture2D(texture_sampler, texCoord)) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, mtl.n));
-		gl_FragColor =vec4(1.0, 0, 1.0,1.0); //vec4(c, 1) + texture2D(texture_sampler, texCoord) * 0.2;
+	vec3 color;// = BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normalize(normCoord),  intensity, mtl);
+	if ( mtl.k_s.r + mtl.k_s.g + mtl.k_s.b > 0.0 ) {
+		vec3 normCoord_ = normalize(normCoord);
 
-	} else {
-		vec3 c = intensity * (cos_theta * mtl.k_d + mtl.k_s * pow(cos_phi, mtl.n));
-		gl_FragColor = vec4(c, 1);// + vec4(1.0, 1,0, 1.0) * 0.2;
+		vec3 dir = reflect( -vec3(viewVector.x, viewVector.y, viewVector.z), normCoord_ );
+		color += mtl.k_s * textureCube( envMap, dir.xzy ).rgb;
 	}
-    //gl_FragColor = vec4(1.0, 0, 1.0,1.0);*/
-	gl_FragColor = vec4(BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normCoord,  intensity, mtl),1);
-
+	gl_FragColor = vec4(color,1);
 
 }
 `;

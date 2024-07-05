@@ -260,13 +260,13 @@ var spheres = fixed_spheres.slice();*/
                 SetMass     ( document.getElementById('mass') );
                 SetStiffness( document.getElementById('stiffness') );
                 circle = new Circle();
-                circle.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
+                circle.meshDrawer.setMaterial([ 0.5, 0.5, 0.0 ],[ 0.8, 0.8, 0.8 ],100,[ 0, 0, 0 ],1.0)
                 circle.meshDrawer.setLightDir_old(0,-1,1)
                 
                 table = new Table();
 
-                table.meshDrawer.setMaterial([ 0.8, 0.8, 1 ],[ 0.8, 0.8, 1 ],1000.0,[ 0, 0, 0 ],1.0)
-                table.meshDrawer.setLightDir_old(0,-1,1)
+                table.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
+                table.meshDrawer.setLightDir_old(0,-1,1000)
 
 
                 net = new Net();
@@ -358,10 +358,12 @@ var spheres = fixed_spheres.slice();*/
                     //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
                     //massSpring.boundingBox.draw(mvp);
-                    massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                    //massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
                     massSpring.pointDrawer.draw(mvp);
+                    circle.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
 
                     circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
                     table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
                     net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
 
