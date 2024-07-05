@@ -1,6 +1,6 @@
 class Table{
     constructor(){
-        this.meshDrawer = new MeshDrawer();
+        this.meshDrawer = new TableMeshDrawer();
 
         this.LoadObj("http://localhost:3000/Tabellone.obj");
     }

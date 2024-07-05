@@ -18,6 +18,8 @@
         <script type="text/javascript" src="Basket/table.js"></script>
         <script type="text/javascript" src="Basket/net.js"></script>
         <script type="text/javascript" src="Basket/circle_mesh_drawer.js"></script>
+        <script type="text/javascript" src="Basket/table_mesh_drawer.js"></script>
+        <script type="text/javascript" src="Basket/net_mesh_drawer.js"></script>
 
         <script type="text/javascript" src="Arena/arena.js"></script>
         <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
@@ -255,11 +257,19 @@ var spheres = fixed_spheres.slice();*/
                 SetMass     ( document.getElementById('mass') );
                 SetStiffness( document.getElementById('stiffness') );
                 circle = new Circle();
-                circle.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],1000,[ 0, 0, 0 ],1.0)
+                circle.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
                 circle.meshDrawer.setLightDir_old(0,-1,1)
-
+                
                 table = new Table();
+
+                table.meshDrawer.setMaterial([ 0.8, 0.8, 1 ],[ 0.8, 0.8, 1 ],1000.0,[ 0, 0, 0 ],1.0)
+                table.meshDrawer.setLightDir_old(0,-1,1)
+
+
                 net = new Net();
+                net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1000.0,[ 0, 0, 0 ],1.0)
+                net.meshDrawer.setLightDir_old(0,-1,1)
+
                 //SetShininess( document.getElementById('shininess-exp') );
                 
                 //console.log(["masspsring",massSpring])
@@ -341,12 +351,12 @@ var spheres = fixed_spheres.slice();*/
                     //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
                     //massSpring.boundingBox.draw(mvp);
-                    //massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-                    //massSpring.pointDrawer.draw(mvp);
+                    massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                    massSpring.pointDrawer.draw(mvp);
 
                     circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
-                    //table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
-                    //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
 
 
                 }

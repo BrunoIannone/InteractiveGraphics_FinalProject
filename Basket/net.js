@@ -1,6 +1,6 @@
 class Net{
     constructor(){
-        this.meshDrawer = new MeshDrawer();
+        this.meshDrawer = new NetMeshDrawer();
 
         this.LoadObj("http://localhost:3000/Rete.obj");
     }
