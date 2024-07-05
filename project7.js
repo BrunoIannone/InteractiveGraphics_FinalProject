@@ -288,51 +288,51 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 	
 	for (var i=0; i < positions.length;i++){
 		
-		if (positions[i].x<-100){
+		if (positions[i].x<-5){
 			
 			/*let scoreElement = document.getElementById("score");
 			let scoreText = scoreElement.innerText;
 			let score = scoreText.split(":");
-			score[1] = parseInt(score[1]) + 1;
-			scoreElement.innerText = score[0] + ": " + score[1];*/
+			score[5] = parseInt(score[5]) + 5;
+			scoreElement.innerText = score[0] + ": " + score[5];*/
 			
 			
-			x0 = -100;
+			x0 = -5;
 			h = x0 - positions[i].x ;
 			positions[i].x = restitution*h + x0;
 			velocities[i].x *= -restitution; 
 		}
 
-		if (positions[i].y<-100){
-			y0 = -100;
+		if (positions[i].y<-5){
+			y0 = -5;
 			h = y0 - positions[i].y ;
 			positions[i].y = restitution*h + y0;
 			velocities[i].y *= -restitution; 
 		}
 
-		if (positions[i].z<-100){
-			z0 = -100;
+		if (positions[i].z<-5){
+			z0 = -5;
 			h =  z0 - positions[i].z;
 			positions[i].z = restitution*h + z0;
 			velocities[i].z *= -restitution; 
 		}
 
-		if (positions[i].x>100){
-			x0 = 100;
+		if (positions[i].x>5){
+			x0 = 5;
 			h = positions[i].x - x0;
 			positions[i].x = x0-restitution*h ;
 			velocities[i].x *= -restitution; 
 		}
 
-		if (positions[i].y>100){
-			y0 = 100;
+		if (positions[i].y>5){
+			y0 = 5;
 			h = positions[i].y - y0;
 			positions[i].y = y0 - restitution*h ;
 			velocities[i].y *= -restitution; 
 		}
 
-		if (positions[i].z>100){
-			z0 = 100;
+		if (positions[i].z>5){
+			z0 = 5;
 			h = positions[i].z - z0;
 			positions[i].z = z0 - restitution*h ;
 			velocities[i].z *= -restitution; 

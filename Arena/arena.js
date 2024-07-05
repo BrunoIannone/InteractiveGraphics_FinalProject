@@ -14,14 +14,14 @@ class BoxDrawer {
 		
 		this.vertbuffer = gl.createBuffer();
 		var pos = [
-			-100, -100, -100,
-			-100, -100,  100,
-			-100,  100, -100,
-			-100,  100,  100,
-			 100, -100, -100,
-			 100, -100,  100,
-			 100,  100, -100,
-			 100,  100,  100 ];
+			-5, -5, -5,
+			-5, -5,  5,
+			-5,  5, -5,
+			-5,  5,  5,
+			 5, -5, -5,
+			 5, -5,  5,
+			 5,  5, -5,
+			 5,  5,  5 ];
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pos), gl.STATIC_DRAW);
 
