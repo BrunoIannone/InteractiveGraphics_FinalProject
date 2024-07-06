@@ -206,6 +206,21 @@ var spheres = fixed_spheres.slice();*/
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
                 
             }*/
+            function initBasket(){
+                circle = new Circle();
+                circle.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
+                circle.meshDrawer.setLightDir_old(0,-1,1)
+                
+                table = new Table();
+
+                table.meshDrawer.setMaterial([ 0.8, 0.8, 0.2 ],[ 1, 1, 1 ],100,[ 0, 0, 0 ],1.0)
+                table.meshDrawer.setLightDir_old(0,0,-1)
+
+
+                net = new Net();
+                net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1.0,[ 0, 0, 0 ],1.0)
+                net.meshDrawer.setLightDir_old(0,-1,1)
+            }
             function InitWebGL() {
                 // Initialize the WebGL canvas
                 canvas = document.getElementById("canvas");
@@ -259,20 +274,8 @@ var spheres = fixed_spheres.slice();*/
                 SetGravity  ( document.getElementById('gravity') );
                 SetMass     ( document.getElementById('mass') );
                 SetStiffness( document.getElementById('stiffness') );
-                circle = new Circle();
-                circle.meshDrawer.setMaterial([ 0.5, 0.5, 0.0 ],[ 0.8, 0.8, 0.8 ],100,[ 0, 0, 0 ],1.0)
-                circle.meshDrawer.setLightDir_old(0,-1,1)
                 
-                table = new Table();
-
-                table.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
-                table.meshDrawer.setLightDir_old(0,-1,1000)
-
-
-                net = new Net();
-                net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1000.0,[ 0, 0, 0 ],1.0)
-                net.meshDrawer.setLightDir_old(0,-1,1)
-
+                    initBasket();
                 //SetShininess( document.getElementById('shininess-exp') );
                 
                 //console.log(["masspsring",massSpring])

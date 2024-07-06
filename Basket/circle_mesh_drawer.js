@@ -318,7 +318,7 @@ void main() {
 	
 		lightdir_ = lightdir - vertexPos;
 	vec3 intensity = vec3(1.0, 1.0, 1.0);
-	vec3 color;// = BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normalize(normCoord),  intensity, mtl);
+	vec3 color = BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normalize(normCoord),  intensity, mtl);
 	if ( mtl.k_s.r + mtl.k_s.g + mtl.k_s.b > 0.0 ) {
 		vec3 normCoord_ = normalize(normCoord);
 
