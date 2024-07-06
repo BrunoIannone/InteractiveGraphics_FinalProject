@@ -249,7 +249,6 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 {
 	
 	// [TO-DO] Compute the total force of each particle
-
 	var forces = Array( positions.length ).fill(0); // The total for per particle
 	
 	//Gravity force computation for each particle
@@ -284,6 +283,21 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 	}
 	
 	
+
+
+
+
+	/*var table_bbox = table.mesh.getBoundingBox();
+	var ball_bbox = massSpring.mesh.updateBoundingBox(positions);
+	console.log(ball_bbox)
+	if (table_bbox && ball_bbox) {
+		const isColliding = checkCollision(table_bbox, ball_bbox);
+		if(isColliding){
+			console.log("Collision:", isColliding); // Output: Collision: true
+		}
+		}*/
+
+
 	// [TO-DO] Handle collisions
 	var x0,y0,z0;
 	
@@ -339,7 +353,130 @@ function SimTimeStep( dt, positions, velocities, springs, stiffness, damping, pa
 			velocities[i].z *= -restitution; 
 		}
 	}
-return ("penis")
+	/*var x0, y0, z0;
+const boundaries = {
+    xMin: -0.4,
+    xMax: 0.4,
+    zMin: -0.3212823019234368 + 0.42,
+    zMax: 0.3212823019234368 + 0.42,
+    yMin: -0.023339231540926146 + 0.3,
+    yMax: 0.023339231540926146 + 0.3
+};
+table_box = table.mesh.getBoundingBox();
+mass_spring_bbox=massSpring.mesh.updateBoundingBox(positions)
+isHit = checkCollision(table_box,mass_spring_bbox);
+if (isHit){
+	console.log(isHit)
+	for (var i = 0; i < positions.length; i++){
+		for (var i = 0; i < positions.length; i++) {
+
+			if (positions[i].x < boundaries.xMin) {
+
+				console.log("Collision")
+				x0 = boundaries.xMin;
+				h = x0 - positions[i].x;
+				positions[i].x = restitution * h + x0;
+				velocities[i].x *= -restitution;
+			}*/
+		
+		   /*if (positions[i].y < boundaries.yMin) {
+				y0 = boundaries.yMin;
+				h = y0 - positions[i].y;
+				positions[i].y = restitution * h + y0;
+				velocities[i].y *= -restitution;
+			}
+		
+			if (positions[i].z < boundaries.zMin) {
+				z0 = boundaries.zMin;
+				h = z0 - positions[i].z;
+				positions[i].z = restitution * h + z0;
+				velocities[i].z *= -restitution;
+			}
+		
+			if (positions[i].x > boundaries.xMax) {
+				x0 = boundaries.xMax;
+				h = positions[i].x - x0;
+				positions[i].x = x0 - restitution * h;
+				velocities[i].x *= -restitution;
+			}
+		
+			if (positions[i].y > boundaries.yMax) {
+				y0 = boundaries.yMax;
+				h = positions[i].y - y0;
+				positions[i].y = y0 - restitution * h;
+				velocities[i].y *= -restitution;
+			}
+		
+			if (positions[i].z > boundaries.zMax) {
+				z0 = boundaries.zMax;
+				h = positions[i].z - z0;
+				positions[i].z = z0 - restitution * h;
+				velocities[i].z *= -restitution;
+			}*/
+	
+
+
+/*for (var i = 0; i < positions.length; i++) {
+
+    if (positions[i].x < boundaries.xMin) {
+        let scoreElement = document.getElementById("score");
+        let scoreText = scoreElement.innerText;
+        let score = scoreText.split(":");
+        score[1] = parseInt(score[1]) + 5;
+        scoreElement.innerText = score[0] + ": " + score[1];
+		console.log("Collision")
+        x0 = boundaries.xMin;
+        h = x0 - positions[i].x;
+        positions[i].x = restitution * h + x0;
+        velocities[i].x *= -restitution;
+    }
+
+   /* if (positions[i].y < boundaries.yMin) {
+        y0 = boundaries.yMin;
+        h = y0 - positions[i].y;
+        positions[i].y = restitution * h + y0;
+        velocities[i].y *= -restitution;
+    }
+
+    if (positions[i].z < boundaries.zMin) {
+        z0 = boundaries.zMin;
+        h = z0 - positions[i].z;
+        positions[i].z = restitution * h + z0;
+        velocities[i].z *= -restitution;
+    }
+
+    if (positions[i].x > boundaries.xMax) {
+        x0 = boundaries.xMax;
+        h = positions[i].x - x0;
+        positions[i].x = x0 - restitution * h;
+        velocities[i].x *= -restitution;
+    }
+
+    if (positions[i].y > boundaries.yMax) {
+        y0 = boundaries.yMax;
+        h = positions[i].y - y0;
+        positions[i].y = y0 - restitution * h;
+        velocities[i].y *= -restitution;
+    }
+
+    if (positions[i].z > boundaries.zMax) {
+        z0 = boundaries.zMax;
+        h = positions[i].z - z0;
+        positions[i].z = z0 - restitution * h;
+        velocities[i].z *= -restitution;
+    }*/
+//}
+
+
+}
+function checkCollision(box1, box2) {
+    // Check for overlap in all three axes
+    for (let i = 0; i < 3; i++) {
+        if (box1.max[i] < box2.min[i] || box1.min[i] > box2.max[i]) {
+            return false; // No collision if there's a gap in any axis
+        }
+    }
+    return true; // Collision if there's overlap in all axes
 }
 
 /*var MeshVS = `

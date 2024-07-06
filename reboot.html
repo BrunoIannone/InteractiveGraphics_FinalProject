@@ -211,11 +211,10 @@ var spheres = fixed_spheres.slice();*/
                 circle.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
                 circle.meshDrawer.setLightDir_old(0,-1,1)
                 
-                table = new Table();
-
+                /*table = new Table(0,0.3,0.42);
                 table.meshDrawer.setMaterial([ 0.8, 0.8, 0.2 ],[ 1, 1, 1 ],100,[ 0, 0, 0 ],1.0)
                 table.meshDrawer.setLightDir_old(0,0,-1)
-
+*/
 
                 net = new Net();
                 net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1.0,[ 0, 0, 0 ],1.0)
@@ -236,6 +235,7 @@ var spheres = fixed_spheres.slice();*/
                 gl.enable(gl.DEPTH_TEST);
                 
                 background = new BackGround(gl);
+                //primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
 
                 UpdateCanvasSize();
                 background.InitEnvironmentMap();
@@ -258,14 +258,13 @@ var spheres = fixed_spheres.slice();*/
                     },gl,20,meshDrawer
                 ))*/
                 //spheres = sphereDrawer.spheres;
-                //primaryRT   = new PrimaryRayTracer(gl,background.screenQuad);
 	            
                 //secondaryRT = new SecondaryRayTracer(20,background,sphereDrawer,gl);
                 
 
                 boxDrawer = new BoxDrawer()
                 //console.log("si")
-                massSpring = new MassSpring(true,"1");
+                massSpring = new MassSpring(false,"1");
                 //console.log(lights.position)
                 massSpring.meshDrawer.setLightDir_old(0,0,1)
                 //massSpring.meshDrawer.setLightDir([0,0,1000],[1,1,1])
@@ -279,8 +278,8 @@ var spheres = fixed_spheres.slice();*/
                 //SetShininess( document.getElementById('shininess-exp') );
                 
                 //console.log(["masspsring",massSpring])
-
-                //primaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
+                basket = [table,circle,net];
+                //primaryRT.init([table,circle,net],lights,maxBounceLimit);
 	            //secondaryRT.init(sphereDrawer.spheres,lights,maxBounceLimit);
                
                 //massSpring = new MassSpring(false,"1",sphereDrawer.spheres[0].triSphere.b.pos)
@@ -360,14 +359,16 @@ var spheres = fixed_spheres.slice();*/
                     
                     //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
-                    //massSpring.boundingBox.draw(mvp);
-                    //massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-                    massSpring.pointDrawer.draw(mvp);
+                    massSpring.boundingBox.draw(mvp);
+                    massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                    //massSpring.pointDrawer.draw(mvp);
                     circle.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
 
                     circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
-                    table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-                    table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    
+                    //table.boundingBox.draw(mvp);
+                    //table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                    //table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
                     net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
 
 

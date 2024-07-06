@@ -16,7 +16,7 @@ class MassSpring {
 		this.damping = 1;
 		this.restitution = .8;
 		this.meshDrawer = new MeshDrawer();
-		this.boundingBox = new BoundingBox(gl);
+		this.boundingBox = new BoundingBox(0,0,0);
 
 		this.setMesh( document.getElementById('sphereee').text );
 		this.pointDrawer = new PointDrawer();
@@ -50,10 +50,7 @@ class MassSpring {
 		var scale = 0.4/maxSize;
 		this.mesh.shiftAndScale( shift, scale );
 		this.mesh.computeNormals();
-		//
-		this.boundingBox.mesh = this.mesh;
-
-		//
+		
 		this.reset();
 		this.initSprings();
 		//DrawScene();
@@ -86,7 +83,7 @@ class MassSpring {
 		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
 		
-		this.boundingBox.createBoundingBox(this.mesh.vpos);
+		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox(this.pos));
 
 	}
 
@@ -143,12 +140,17 @@ class MassSpring {
 
 		// Update the mesh drawer and redraw scene
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		this.boundingBox.createBoundingBox(this.mesh.updateBoundingBox(this.pos));
 		this.pointDrawer.updatePoint();
+
 		DrawScene();
+		
+
 	}
 
 	simTimeStep()
 	{
+		
 
 		// remember the position of the selected vertex, if any
 		var p = this.holdVert ? this.holdVert.copy() : undefined;
@@ -157,20 +159,14 @@ class MassSpring {
 		var timestep = document.getElementById('timestep').value;
 		const dt = timestep / 1000;	// time step in seconds
 		const damping = this.damping * this.stiffness * dt;
-		var pre = [...this.pos];
-		//console.log("prima")
 		SimTimeStep( dt, this.pos, this.vel, this.springs, this.stiffness, damping, this.mass, this.gravity, this.restitution );
-		//console.log("fuori")
 
-		var post = [...this.pos]
-		//console.log(this.pos);
 		// make sure that the selected vertex does not change position
 		if ( p ) {
 			this.holdVert.set(p);
 			this.vel[ this.selVert ].init(0,0,0);
 		}
-		this.boundingBox.createBoundingBox(this.pos);
-		
+
 		this.updateMesh();
 
 		//console.log("EELLLE",this.mesh.getBoundingBox());

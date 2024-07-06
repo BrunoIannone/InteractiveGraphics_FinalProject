@@ -11,8 +11,8 @@ class BoxDrawer {
 		this.vertPos = gl.getAttribLocation( this.prog, 'pos' );
 		
 		// Create the buffer objects
-		
 		this.vertbuffer = gl.createBuffer();
+
 		var pos = [
 			-5, -5, -5,
 			-5, -5,  5,

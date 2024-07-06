@@ -1,8 +1,11 @@
 class Table{
-    constructor(){
+    constructor(x_offset,y_offset,z_offset){
         this.meshDrawer = new TableMeshDrawer();
 
         this.LoadObj("http://localhost:3000/Tabellone.obj");
+		this.boundingBox = new BoundingBox(gl,x_offset,y_offset,z_offset);
+		//this.boundingBox.setOffset(0,5,0.42);
+
     }
 
     /*LoadObj( param )
@@ -63,7 +66,7 @@ class Table{
 		this.mesh.shiftAndScale( shift, scale );
 		this.mesh.computeNormals();
 		//
-//		this.boundingBox.mesh = this.mesh;
+		this.boundingBox.mesh = this.mesh;
 
 		//
 		this.reset();
@@ -84,7 +87,7 @@ class Table{
 		this.buffers = this.mesh.getVertexBuffers();
 		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
-		//this.boundingBox.createBoundingBox(this.mesh.vpos);
+		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox(this.mesh.vpos));
 
 	}
 }
