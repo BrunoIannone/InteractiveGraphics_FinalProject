@@ -29,7 +29,7 @@ class Net{
             })
             .then(data => {
                 this.setMesh(data);
-                DrawScene();
+                //DrawScene();
             })
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);

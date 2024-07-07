@@ -3,7 +3,8 @@ class Table{
         this.meshDrawer = new TableMeshDrawer();
 
         this.LoadObj("http://localhost:3000/Tabellone.obj");
-		this.boundingBox = new BoundingBox(gl,x_offset,y_offset,z_offset);
+		this.boundingBox = new BoundingBox(x_offset,y_offset,z_offset);
+		this.boundingBox.setSwap(true);
 		//this.boundingBox.setOffset(0,5,0.42);
 
     }
@@ -32,7 +33,7 @@ class Table{
             })
             .then(data => {
                 this.setMesh(data);
-                DrawScene();
+                //DrawScene();
             })
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);
@@ -65,12 +66,7 @@ class Table{
 		var scale = 0.4/maxSize;
 		this.mesh.shiftAndScale( shift, scale );
 		this.mesh.computeNormals();
-		//
-		this.boundingBox.mesh = this.mesh;
-
-		//
 		this.reset();
-//		this.initSprings();
 		//DrawScene();
 
 	}
@@ -85,9 +81,18 @@ class Table{
 		this.nrm = Array( this.mesh.norm.length );
 		for ( var i=0; i<this.nrm.length; ++i ) this.nrm[i] = ToVec3( this.mesh.norm[i] );
 		this.buffers = this.mesh.getVertexBuffers();
-		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
-		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox(this.mesh.vpos));
+		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
+		this.boundingBox.setTest(true)
 
+	}
+	vectorize(pos){
+		
+		var res = [];
+		for(var i=0; i < pos.length;i+=3){
+			res.push([pos[i],pos[i+1],pos[i+2]])
+
+		}
+		return res
 	}
 }

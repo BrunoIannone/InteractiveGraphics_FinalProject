@@ -90,13 +90,13 @@ class MeshDrawer
 		gl.useProgram(this.prog);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertPos), gl.DYNAMIC_DRAW);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.DYNAMIC_DRAW);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.DYNAMIC_DRAW);
 	
 	}
 	

@@ -1,7 +1,7 @@
 class Circle{
     constructor(){
         this.meshDrawer = new CircleMeshDrawer();
-
+		
         this.LoadObj("http://localhost:3000/Cerchio.obj");
     }
 
@@ -29,7 +29,7 @@ class Circle{
             })
             .then(data => {
                 this.setMesh(data);
-                DrawScene();
+                //DrawScene();
             })
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);

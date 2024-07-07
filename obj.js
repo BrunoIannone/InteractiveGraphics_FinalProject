@@ -94,7 +94,6 @@ class ObjMesh
 	}
 	updateBoundingBox(vpos)
 	{
-		console.log(vpos)
 		//console.log(vpos.constructor.name); // Stampa "MyClass"
 
 		//console.log("mia",vpos)

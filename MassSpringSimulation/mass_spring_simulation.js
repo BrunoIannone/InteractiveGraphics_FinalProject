@@ -17,7 +17,7 @@ class MassSpring {
 		this.restitution = .8;
 		this.meshDrawer = new MeshDrawer();
 		this.boundingBox = new BoundingBox(0,0,0);
-
+		this.boundingBox.setSwap(false);
 		this.setMesh( document.getElementById('sphereee').text );
 		this.pointDrawer = new PointDrawer();
 
@@ -83,7 +83,7 @@ class MassSpring {
 		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
 		
-		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox(this.pos));
+		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
 
 	}
 
@@ -140,12 +140,21 @@ class MassSpring {
 
 		// Update the mesh drawer and redraw scene
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
-		this.boundingBox.createBoundingBox(this.mesh.updateBoundingBox(this.pos));
+		this.boundingBox.createBoundingBox(this.mesh.updateBoundingBox(this.vectorize(this.buffers.positionBuffer)));
 		this.pointDrawer.updatePoint();
 
 		DrawScene();
 		
 
+	}
+	vectorize(pos){
+		
+		var res = [];
+		for(var i=0; i < pos.length;i+=3){
+			res.push([pos[i],pos[i+1],pos[i+2]])
+
+		}
+		return res
 	}
 
 	simTimeStep()

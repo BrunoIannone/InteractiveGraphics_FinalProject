@@ -60,7 +60,14 @@ class BoundingBox {
         // Create and bind the index buffer
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(line), gl.DYNAMIC_DRAW);
     }
+    setTest(value){
+        gl.useProgram(this.prog);
 
+        var test_location = gl.getUniformLocation(this.prog, 'test');
+        gl.uniform1i(test_location, value);
+
+
+    }
     setOffset(x_offset,y_offset,z_offset){
         
         gl.useProgram(this.prog);
@@ -72,8 +79,18 @@ class BoundingBox {
         gl.uniform1f(z_offset_location, z_offset);
 
     }
+    setSwap( swap )
+	{
+        console.log("si")
+		// [TO-DO] Set the uniform parameter(s) of the vertex shader
+		gl.useProgram(this.prog);
+
+		//Assign swap VS variable the swap value
+		var swap_location = gl.getUniformLocation(this.prog, 'swap');
+		gl.uniform1i(swap_location, swap);
+	}
     draw(trans) {
-        
+        console.log("qui")
         // Draw the line segments
         gl.useProgram( this.prog );
 		gl.uniformMatrix4fv( this.mvp, false, trans );
@@ -90,11 +107,17 @@ var bboxVS = `
     uniform float x_offset;
 	uniform float y_offset;
     uniform float z_offset;
-    
+    uniform bool swap;
     uniform mat4 mvp;
 	void main()
 	{
-		gl_Position = mvp * vec4(pos.x + x_offset,pos.z + z_offset,pos.y+y_offset,1);
+        if(swap){
+            gl_Position = mvp * vec4(pos.x + x_offset,pos.z + z_offset,pos.y+y_offset,1);
+
+        }
+        else{
+            gl_Position = mvp * vec4(pos.x + x_offset,pos.y + y_offset,pos.z+z_offset,1);
+        }
         //gl_Position = mvp * vec4(pos.x,pos.z+0.42,pos.y+0.3,1);
 
 	}
@@ -102,9 +125,15 @@ var bboxVS = `
 // Fragment shader source code
 var bboxFS = `
 	precision mediump float;
+    uniform bool test;
 	void main()
 	{
+        if(test){
+            gl_FragColor = vec4(1,0,0,1);
+        }
+        else{
 		gl_FragColor = vec4(0,1,0,1);
-	}
+        }
+    }
 `;
 
