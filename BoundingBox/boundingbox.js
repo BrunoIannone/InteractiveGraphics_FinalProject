@@ -81,7 +81,7 @@ class BoundingBox {
     }
     setSwap( swap )
 	{
-        console.log("si")
+        //console.log("si")
 		// [TO-DO] Set the uniform parameter(s) of the vertex shader
 		gl.useProgram(this.prog);
 
@@ -90,7 +90,7 @@ class BoundingBox {
 		gl.uniform1i(swap_location, swap);
 	}
     draw(trans) {
-        console.log("qui")
+        //console.log("qui")
         // Draw the line segments
         gl.useProgram( this.prog );
 		gl.uniformMatrix4fv( this.mvp, false, trans );

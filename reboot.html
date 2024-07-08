@@ -331,7 +331,12 @@ var spheres = fixed_spheres.slice();*/
                 //primaryRT.updateProj();
                 //secondaryRT.updateProj();
             }
-            
+            function drawBackground(){
+                gl.flush();
+                var trans = GetTrans();
+                background.draw( trans );
+
+            }
             function DrawScene() {
                 gl.flush();
                 //console.log(document.getElementById('show-texture').param.checked)
@@ -349,6 +354,7 @@ var spheres = fixed_spheres.slice();*/
                 // Clear the screen and the depth buffer.
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 if(background){
+                   
                     background.draw( trans );
                     
                     }
@@ -361,16 +367,24 @@ var spheres = fixed_spheres.slice();*/
                     
                     //sphereDrawer.setTrans( mvp, [ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ] );
                     //sphereDrawer.spheres.forEach( s => sphereDrawer.draw(s,mvp,MV,nrm) );
+                    if(massSpring){
                     massSpring.boundingBox.draw(mvp);
-                    //massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-                    //massSpring.pointDrawer.draw(mvp);
-                    //circle.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-
-                    //circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    massSpring.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                    massSpring.pointDrawer.draw(mvp);
                     
-                    //table.boundingBox.draw(mvp);
+                    }
+                    if(circle){
+                        //circle.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+
+                        //circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    
+                    }
+                    if(table){
+                    table.boundingBox.draw(mvp);
                     //table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
                     //table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    
+                    }
                     //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
 
 
@@ -477,7 +491,7 @@ var spheres = fixed_spheres.slice();*/
 		            canvas.onmousemove = function() { massSpring.mouseMove(); }
                 }
                 
-                DrawScene();
+                //DrawScene();
             };
             function WindowResize() {
                 UpdateCanvasSize();

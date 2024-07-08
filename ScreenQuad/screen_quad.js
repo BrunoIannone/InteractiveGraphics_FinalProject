@@ -131,10 +131,12 @@ class BackGround
 					loaded++;
 					if ( loaded == 6 ) {
 						gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-						//DrawScene();
+						DrawScene();
+
 					}
 				};
 				img.src = url + files[i];
+				
 			}
 			gl.texParameteri( gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
 			const textureSampler = gl.getUniformLocation(this.prog, "envMap");
