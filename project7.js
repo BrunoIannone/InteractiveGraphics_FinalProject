@@ -312,6 +312,8 @@ function isBoundingBoxInside(bbox1, bbox2, threshold = 0) {
             bbox1.min[1] >= minThreshold[1] && bbox1.max[1] <= maxThreshold[1] && // bbox1 è dentro bbox2 lungo l'asse y
             bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 è dentro bbox2 lungo l'asse z
 }
+
+
 function isBoundingBoxInsideSwapped(bbox1, bbox2, threshold = 0) {
     // Aggiungi la threshold ai limiti della seconda bounding box
     let minThreshold = bbox2.min.map((val) => val - threshold);
@@ -321,6 +323,20 @@ function isBoundingBoxInsideSwapped(bbox1, bbox2, threshold = 0) {
             bbox1.min[1] >= minThreshold[1] && bbox1.max[1] <= maxThreshold[1] && // bbox1 è dentro bbox2 lungo l'asse y
             bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 è dentro bbox2 lungo l'asse z
 }
+function isBoundingBoxCenterInside(bbox1, bbox2, threshold = 0) {
+    // Calcola il centro di bbox1
+    let center = bbox1.min.map((val, idx) => (val + bbox1.max[idx]) / 2);
+
+    // Aggiungi la threshold ai limiti della seconda bounding box
+    let minThreshold = bbox2.min.map((val) => val - threshold);
+    let maxThreshold = bbox2.max.map((val) => val + threshold);
+
+    // Verifica se il centro di bbox1 è dentro bbox2
+    return (center[0] >= minThreshold[0] && center[0] <= maxThreshold[0] && // il centro è dentro bbox2 lungo l'asse x
+            center[1] >= minThreshold[1] && center[1] <= maxThreshold[1] && // il centro è dentro bbox2 lungo l'asse y
+            center[2] >= minThreshold[2] && center[2] <= maxThreshold[2]);  // il centro è dentro bbox2 lungo l'asse z
+}
+
 function handleSceneCollisions(positions,restitution,velocities){
 	var x0,y0,z0;
 
@@ -378,12 +394,12 @@ function handleSceneCollisions(positions,restitution,velocities){
 	}
 
 }
-function handleObjectCollisions(positions, restitution, velocities, boundingBox, x_offset, y_offset, z_offset) {
+/*function handleObjectCollisions(positions, restitution, velocities, boundingBox, x_offset, y_offset, z_offset) {
     var x0, y0, z0, h;
 
-    for (var i = 0; i < positions.length; i++) {
+		 for (var i = 0; i < positions.length; i++) {
         // Controllo collisione con la parte minima della bounding box
-       /* if (positions[i].x < boundingBox.min[0] + x_offset) {
+        if (positions[i].x < boundingBox.min[0] + x_offset) {
             x0 = boundingBox.min[0] + x_offset;
             h = x0 - positions[i].x;
             positions[i].x = restitution * h + x0;
@@ -402,7 +418,7 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
             h = y0 - positions[i].y;
             positions[i].y = restitution * h + y0;
             velocities[i].y *= -restitution;
-        }*/
+        }
 
         // Controllo collisione con la parte massima della bounding box
         if (positions[i].x > boundingBox.max[0] + x_offset) {
@@ -426,7 +442,161 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].z *= -restitution;
         }
     }
+}*/
+
+function handleObjectCollisions(positions, restitution, velocities, boundingBox, translation) {
+    var x0, y0, z0, h;
+
+    for (var i = 0; i < positions.length; i++) {
+        // Controllo collisione con la parte minima della bounding box
+        /*if (positions[i].x < boundingBox.min[0] + translation.x) {
+            x0 = boundingBox.min[0] + translation.x;
+            h = x0 - positions[i].x;
+            positions[i].x = restitution * h + x0;
+            velocities[i].x *= -restitution;
+        }
+
+        if (positions[i].y < boundingBox.min[2] + translation.y) { // Scambio z <-> y corretto
+            y0 = boundingBox.min[2] + translation.y;
+            h = y0 - positions[i].y;
+            positions[i].y = restitution * h + y0;
+            velocities[i].y *= -restitution;
+        }
+
+        if (positions[i].z < boundingBox.min[1] + translation.z) { // Scambio y <-> z corretto
+            z0 = boundingBox.min[1] + translation.z;
+            h = z0 - positions[i].z;
+            positions[i].z = restitution * h + z0;
+            velocities[i].z *= -restitution;
+        }*/
+
+        // Controllo collisione con la parte massima della bounding box
+        if (positions[i].x > boundingBox.max[0] + translation.x) {
+            x0 = boundingBox.max[0] + translation.x;
+            h = positions[i].x - x0;
+            positions[i].x = x0 - restitution * h;
+            velocities[i].x *= -restitution;
+        }
+
+        if (positions[i].y > boundingBox.max[2] + translation.y) { // Scambio z <-> y corretto
+            y0 = boundingBox.max[2] + translation.y;
+            h = positions[i].y - y0;
+            positions[i].y = y0 - restitution * h;
+            velocities[i].y *= -restitution;
+        }
+
+        if (positions[i].z > boundingBox.max[1] + translation.z) { // Scambio y <-> z corretto
+            z0 = boundingBox.max[1] + translation.z;
+            h = positions[i].z - z0;
+            positions[i].z = z0 - restitution * h;
+            velocities[i].z *= -restitution;
+        }
+    }
 }
+
+
+function handleCircleCollisions(positions, restitution, velocities, boundingBox, translation) {
+    var x0, y0, z0, h;
+
+    for (var i = 0; i < positions.length; i++) {
+        // Controllo collisione con la parte minima della bounding box
+        if (positions[i].x < boundingBox.min[0] + translation.x) {
+            x0 = boundingBox.min[0] + translation.x;
+            h = x0 - positions[i].x;
+            positions[i].x = restitution * h + x0;
+            velocities[i].x *= -restitution;
+        }
+
+        if (positions[i].y < boundingBox.min[2] + translation.y) { // Scambio z <-> y corretto
+            y0 = boundingBox.min[2] + translation.y;
+            h = y0 - positions[i].y;
+            positions[i].y = restitution * h + y0;
+            velocities[i].y *= -restitution;
+        }
+
+        if (positions[i].z < boundingBox.min[1] + translation.z) { // Scambio y <-> z corretto
+            z0 = boundingBox.min[1] + translation.z;
+            h = z0 - positions[i].z;
+            positions[i].z = restitution * h + z0;
+            velocities[i].z *= -restitution;
+        }
+
+        // Controllo collisione con la parte massima della bounding box
+        /*if (positions[i].x > boundingBox.max[0] + translation.x) {
+            x0 = boundingBox.max[0] + translation.x;
+            h = positions[i].x - x0;
+            positions[i].x = x0 - restitution * h;
+            velocities[i].x *= -restitution;
+        }
+
+        if (positions[i].y > boundingBox.max[2] + translation.y) { // Scambio z <-> y corretto
+            y0 = boundingBox.max[2] + translation.y;
+            h = positions[i].y - y0;
+            positions[i].y = y0 - restitution * h;
+            velocities[i].y *= -restitution;
+        }
+
+        if (positions[i].z > boundingBox.max[1] + translation.z) { // Scambio y <-> z corretto
+            z0 = boundingBox.max[1] + translation.z;
+            h = positions[i].z - z0;
+            positions[i].z = z0 - restitution * h;
+            velocities[i].z *= -restitution;
+        }*/
+    }
+}
+
+
+
+
+/*function handleObjectCollisions(positions, restitution, velocities, boundingBox) {
+    var x0, y0, z0, h;
+
+    for (var i = 0; i < positions.length; i++) {
+        // Controllo collisione con la parte minima della bounding box
+        /*if (positions[i].x < boundingBox.min[0] ) {
+            x0 = boundingBox.min[0] ;
+            h = x0 - positions[i].x;
+            positions[i].x = restitution * h + x0;
+            velocities[i].x *= -restitution;
+        }
+
+        if (positions[i].y < boundingBox.min[2] ) { // Scambio z <-> y corretto
+            y0 = boundingBox.min[2] ;
+            h = y0 - positions[i].y;
+            positions[i].y = restitution * h + y0;
+            velocities[i].y *= -restitution;
+        }
+
+        if (positions[i].z < boundingBox.min[1] ) { // Scambio y <-> z corretto
+            z0 = boundingBox.min[1];
+            h = z0 - positions[i].z;
+            positions[i].z = restitution * h + z0;
+            velocities[i].z *= -restitution;
+        }
+
+        // Controllo collisione con la parte massima della bounding box
+        if (positions[i].x > boundingBox.max[0] ) {
+            x0 = boundingBox.max[0] ;
+            h = positions[i].x - x0;
+            positions[i].x = x0 - restitution * h;
+            velocities[i].x *= -restitution;
+        }
+
+        if (positions[i].y > boundingBox.max[2] ) { // Scambio z <-> y corretto
+            y0 = boundingBox.max[2] ;
+            h = positions[i].y - y0;
+            positions[i].y = y0 - restitution * h;
+            velocities[i].y *= -restitution;
+        }
+
+        if (positions[i].z > boundingBox.max[1] ) { // Scambio y <-> z corretto
+            z0 = boundingBox.max[1] ;
+            h = positions[i].z - z0;
+            positions[i].z = z0 - restitution * h;
+            velocities[i].z *= -restitution;
+        }
+    }
+}*/
 
 
 
@@ -441,7 +611,6 @@ function vectorize(pos){
 	return res
 }
 /*function checkCollision(box1, box2) {
-	console.log("PENE")
     // Check for overlap in all three axes
     for (let i = 0; i < 3; i++) {
         if (box1.max[i] < box2.min[i] || box1.min[i] > box2.max[i]) {
@@ -451,111 +620,6 @@ function vectorize(pos){
     return true; // Collision if there's overlap in all axes
 }*/
 
-/*var MeshVS = `
-	attribute vec3 vertex_pos;
-	attribute vec2 texture_pos; //Texture positions
-
-    uniform mat4  mvp;
-	uniform vec3  center;
-	uniform float radius;
-	varying vec3 pos;
-	varying vec3 normCoord;
-	varying vec2 texCoord;
-
-	void main()
-	{
-		pos = vertex_pos*radius + center;
-		gl_Position = mvp * vec4(pos,1);
-		normCoord = vertex_pos;
-		texCoord = texture_pos;
-
-	}
-
-`;
-
-
-
-// Fragment shader source code for mesh
-var MeshFS = `
-precision mediump float;
-
-uniform sampler2D texture_sampler;
-uniform bool use_texture;
-//uniform samplerCube envMap;
-
-struct Material {
-    vec3 k_d; // diffuse coefficient
-    vec3 k_s; // specular coefficient
-    float n;  // specular exponent
-};
-
-struct Light {
-    vec3 position;
-    vec3 intensity;
-};
-
-uniform Light light;
-uniform vec3 campos;
-uniform Material mtl;
-
-varying vec3 pos;
-varying vec3 normCoord;
-varying vec2 texCoord;
-
-void main() {
-    vec3 nrm = normalize(normCoord);
-    vec3 view = normalize(campos - pos);
-    vec3 color = vec3(0.0);
-
-    // Light direction
-    vec3 L = normalize(light.position - pos);
-    float c = dot(nrm, L);
-
-    if (c > 0.0) {
-        vec3 diffuse = c * mtl.k_d;
-        vec3 h = normalize(L + view);
-        float s = dot(nrm, h);
-        
-        if (s > 0.0) {
-            diffuse += mtl.k_s * pow(s, mtl.n);
-        }
-        
-        color += diffuse * light.intensity;
-    }
-	if (use_texture == false) {
-        // Color for debugging: red means is false
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        return;
-    } /*else {
-        // Color for debugging: green means is true
-        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-        return;
-    }
-    if (use_texture==true) {
-        vec3 texColor = texture2D(texture_sampler, texCoord).rgb;
-        vec3 h = normalize(light.position + view);
-        float cos_theta = max(0.0, dot(light.position, normCoord));
-        float cos_phi = max(0.0, dot(normCoord, h));
-        vec3 textureLight = light.intensity * (cos_theta * texColor + vec3(1.0) * pow(cos_phi, 0.1));
-        gl_FragColor = vec4(color, 1.0)+ vec4(textureLight, 1.0) * 0.2;
-		return;
-    } /*else {
-        if (dot(mtl.k_s, vec3(1.0)) > 0.0) {
-            vec3 dir = reflect(-view, nrm);
-            vec3 envColor = textureCube(envMap, dir.xzy).rgb;
-            color += mtl.k_s * envColor;
-			gl_FragColor = vec4(color, 1.0);
-			return;
-        }
-       
-    }
-	else{
-		gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-
-	}
-}
-
-`;*/
 var MeshVS = `
 precision mediump float;
 

@@ -14,7 +14,7 @@ class MassSpring {
 		this.mass = .1;
 		this.stiffness = 1;
 		this.damping = 1;
-		this.restitution = .8;
+		this.restitution = .1;
 		this.meshDrawer = new MeshDrawer();
 		this.boundingBox = new BoundingBox(0,0,0);
 		this.boundingBox.setSwap(false);
@@ -163,7 +163,10 @@ class MassSpring {
 
    	if(!isBoundingBoxInside(mesh_bbox,scene)){
 		//console.log("outofbound")
+		//var audio = new Audio('audio_file.mp3');
+		//audio.play();
 	   handleSceneCollisions(this.pos,this.restitution,this.vel)
+	   collide = true;
 
    }
 
@@ -177,21 +180,29 @@ class MassSpring {
    testbb.setSwap(true)
 		// [TO-DO] Handle collisions
 	testbb.createBoundingBox(circle.mesh.getBoundingBox())
-	if(this.checkCollision(mesh_bbox,table_bbox,0,0.3,0.42))	{
-		//console.log("hit")
-
-		handleObjectCollisions(this.pos,this.restitution,this.vel,table_bbox,0,0.42,0.3);
-		}
+	if(this.checkCollision(mesh_bbox,table_bbox,0,0.42,0.3))	{
+		console.log("hit")
+		
+		handleObjectCollisions(this.pos,this.restitution,this.vel,table_bbox,new Vec3(0,0.42,0.3));
+		collide = true;	
+	}
 	var circle_bbox = circle.mesh.getBoundingBox();
-	if(this.checkCollision(mesh_bbox,circle_bbox,0.2,0.1,0.2)){
+	if(this.checkCollision(mesh_bbox,circle_bbox,0,0,0)){
 		console.log("circle hit")
 
-		if(isBoundingBoxInsideSwapped(mesh_bbox,circle_bbox,0.4)){
+		if(isBoundingBoxCenterInside(mesh_bbox,circle_bbox,0)){
 			console.log("circle inside")
+			//handleObjectCollisions(this.pos,this.restitution,this.vel,circle_bbox,new Vec3(0,0,0));
+			collide = false;
 
 		}
 		else{
-			handleObjectCollisions(this.pos,this.restitution,this.vel,circle_bbox,0,0,0);
+			if (collide){
+				handleCircleCollisions(this.pos,this.restitution,this.vel,circle_bbox,new Vec3(0,0,0));
+
+			}
+
+			
 
 		}
 

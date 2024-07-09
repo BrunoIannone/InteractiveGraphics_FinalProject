@@ -126,7 +126,7 @@
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox, arena_size = 3;
-            var massSpring,MVP,lightView, testbb;
+            var massSpring,MVP,lightView, testbb, collide = true;
 
             //var spheres;
 
@@ -380,7 +380,7 @@ var spheres = fixed_spheres.slice();*/
                     
                     }
                     if(table){
-                    //table.boundingBox.draw(mvp);
+                    table.boundingBox.draw(mvp);
                     
                     table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
                     table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
@@ -449,6 +449,13 @@ var spheres = fixed_spheres.slice();*/
 
 
             window.onload = function () {
+                document.addEventListener('keydown', function(event) {
+                    if (event.code === 'Space') {
+                        // Your spacebar functionality here
+                        massSpring.reset();
+                        // For example, you can call a function or change a state
+                    }
+                });
                 showBox = document.getElementById('show-box');
                 document.getElementById('show-texture').checked = false;
                 InitWebGL();
