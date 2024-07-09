@@ -261,7 +261,7 @@ varying vec3 vertexPos;
 void main()
 {
 	/*if (swap){
-		gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y,1);
+		gl_Position = mvp * vec4(3*vertex_pos.x,3*vertex_pos.z,3*vertex_pos.y,1);
 		
 
 	}

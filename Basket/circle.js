@@ -1,7 +1,9 @@
 class Circle{
     constructor(){
         this.meshDrawer = new CircleMeshDrawer();
-		
+		this.boundingBox = new BoundingBox(0,0,0);
+		this.boundingBox.setSwap(true);
+
         this.LoadObj("http://localhost:3000/Cerchio.obj");
     }
 
@@ -84,6 +86,8 @@ class Circle{
 		this.buffers = this.mesh.getVertexBuffers();
 		//console.log(this.buffers)
 		this.meshDrawer.setMesh( this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer );
+		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
+
 		//this.boundingBox.createBoundingBox(this.mesh.vpos);
 
 	}

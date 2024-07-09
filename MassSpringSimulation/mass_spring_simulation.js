@@ -89,30 +89,7 @@ class MassSpring {
 
 	updateMesh()
 	{
-		function updateBuffer( buffer, faces, verts )
-		{
-			function addTriangleToBuffer( buffer, bi, vals, i, j, k )
-			{
-				buffer[bi++] = vals[i].x;
-				buffer[bi++] = vals[i].y;
-				buffer[bi++] = vals[i].z;
-				buffer[bi++] = vals[j].x;
-				buffer[bi++] = vals[j].y;
-				buffer[bi++] = vals[j].z;
-				buffer[bi++] = vals[k].x;
-				buffer[bi++] = vals[k].y;
-				buffer[bi++] = vals[k].z;
-			}
-			for ( var i=0, bi=0; i<faces.length; ++i ) {
-				var f = faces[i];
-				if ( f.length < 3 ) continue;
-				addTriangleToBuffer( buffer, bi, verts, f[0], f[1], f[2] );
-				bi += 9;
-				for ( var j=3; j<f.length; ++j, bi+=9 ) {
-					addTriangleToBuffer( buffer, bi, verts, f[0], f[j-1], f[j] );
-				}
-			}
-		}
+		
 		
 		// update the position buffer
 		updateBuffer( this.buffers.positionBuffer, this.mesh.face, this.pos );
@@ -148,7 +125,6 @@ class MassSpring {
 
 	}
 	vectorize(pos){
-		
 		var res = [];
 		for(var i=0; i < pos.length;i+=3){
 			res.push([pos[i],pos[i+1],pos[i+2]])
@@ -168,7 +144,7 @@ class MassSpring {
 		var timestep = document.getElementById('timestep').value;
 		const dt = timestep / 1000;	// time step in seconds
 		const damping = this.damping * this.stiffness * dt;
-		SimTimeStep( dt, this.pos, this.vel, this.springs, this.stiffness, damping, this.mass, this.gravity, this.restitution );
+		SimTimeStep( dt, this.pos, this.vel, this.springs, this.stiffness, damping, this.mass, this.gravity, this.restitution, this.mesh );
 
 		// make sure that the selected vertex does not change position
 		if ( p ) {
@@ -176,11 +152,83 @@ class MassSpring {
 			this.vel[ this.selVert ].init(0,0,0);
 		}
 
-		this.updateMesh();
+	updateBuffer( this.buffers.positionBuffer, this.mesh.face, this.pos );
+	
+	//DrawScene()
+	var mesh_bbox = this.mesh.updateBoundingBox(this.vectorize(this.buffers.positionBuffer))
+	// Definire i limiti della scena
+	var scene = {min:[-arena_size, -arena_size, -arena_size],
+  	 max:[arena_size, arena_size, arena_size]};
+
+
+   	if(!isBoundingBoxInside(mesh_bbox,scene)){
+		//console.log("outofbound")
+	   handleSceneCollisions(this.pos,this.restitution,this.vel)
+
+   }
+
+   var table_position_buffer = table.buffers.positionBuffer
+   //updateBuffer( table_position_buffer, table.mesh.face, table.pos );
+   table_position_buffer = table.buffers.positionBuffer
+   //var table_bbox = table.mesh.updateBoundingBox(this.vectorize(table_position_buffer))
+   var table_bbox = table.mesh.getBoundingBox();
+   //console.log(table_bbox)
+   testbb = new BoundingBox(0,0,0); 
+   testbb.setSwap(true)
+		// [TO-DO] Handle collisions
+	testbb.createBoundingBox(circle.mesh.getBoundingBox())
+	if(this.checkCollision(mesh_bbox,table_bbox,0,0.3,0.42))	{
+		//console.log("hit")
+
+		handleObjectCollisions(this.pos,this.restitution,this.vel,table_bbox,0,0.42,0.3);
+		}
+	var circle_bbox = circle.mesh.getBoundingBox();
+	if(this.checkCollision(mesh_bbox,circle_bbox,0.2,0.1,0.2)){
+		console.log("circle hit")
+
+		if(isBoundingBoxInsideSwapped(mesh_bbox,circle_bbox,0.4)){
+			console.log("circle inside")
+
+		}
+		else{
+			handleObjectCollisions(this.pos,this.restitution,this.vel,circle_bbox,0,0,0);
+
+		}
+
+	}
+	 
+	
+	
+	
+	this.updateMesh();
 
 		//console.log("EELLLE",this.mesh.getBoundingBox());
 
 	}
+	 checkCollision(bbox1, bbox2, x_offset, y_offset, z_offset) {
+		// bbox1 e bbox2 sono oggetti con struttura { min: [x1, y1, z1], max: [x2, y2, z2] }
+		// Gli offset sono aggiunti ai confronti degli assi corrispondenti
+	
+		// Verifica collisione lungo l'asse x con x_offset
+		if (bbox1.max[0] + x_offset < bbox2.min[0] || bbox1.min[0] > bbox2.max[0] + x_offset) {
+			return false;
+		}
+	
+		// Verifica collisione lungo l'asse y con y_offset (considerando lo scambio z <-> y)
+		if (bbox1.max[1]  < bbox2.min[2]+ y_offset || bbox1.min[1] > bbox2.max[2] + y_offset ) {
+			return false;
+		}
+	
+		// Verifica collisione lungo l'asse z con z_offset (considerando lo scambio y <-> z)
+		if (bbox1.max[2]  < bbox2.min[1]+ z_offset || bbox1.min[2] > bbox2.max[1]+ z_offset ) {
+			return false;
+		}
+	
+		// Se c'è intersezione lungo tutti gli assi, c'è una collisione
+		return true;
+	}
+	
+	
 	startSimulation()
 	{
 		
@@ -282,5 +330,31 @@ class MassSpring {
 	mouseUp()
 	{
 		this.holdVert = undefined;
+	}
+}
+function addTriangleToBuffer( buffer, bi, vals, i, j, k )
+			{
+				buffer[bi++] = vals[i].x;
+				buffer[bi++] = vals[i].y;
+				buffer[bi++] = vals[i].z;
+				buffer[bi++] = vals[j].x;
+				buffer[bi++] = vals[j].y;
+				buffer[bi++] = vals[j].z;
+				buffer[bi++] = vals[k].x;
+				buffer[bi++] = vals[k].y;
+				buffer[bi++] = vals[k].z;
+			}
+
+function updateBuffer( buffer, faces, verts )
+{
+	
+	for ( var i=0, bi=0; i<faces.length; ++i ) {
+		var f = faces[i];
+		if ( f.length < 3 ) continue;
+		addTriangleToBuffer( buffer, bi, verts, f[0], f[1], f[2] );
+		bi += 9;
+		for ( var j=3; j<f.length; ++j, bi+=9 ) {
+			addTriangleToBuffer( buffer, bi, verts, f[0], f[j-1], f[j] );
+		}
 	}
 }

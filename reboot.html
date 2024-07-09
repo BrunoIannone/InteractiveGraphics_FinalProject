@@ -125,8 +125,8 @@
             //var environmentTexture;
             const maxBounceLimit = 16;
             var primaryRT, secondaryRT;
-            var boxDrawer, showBox;
-            var massSpring,MVP,lightView;
+            var boxDrawer, showBox, arena_size = 3;
+            var massSpring,MVP,lightView, testbb;
 
             //var spheres;
 
@@ -207,9 +207,9 @@ var spheres = fixed_spheres.slice();*/
                 
             }*/
             function initBasket(){
-                /*circle = new Circle();
+                circle = new Circle();
                 circle.meshDrawer.setMaterial([ 1.0, 0.4, 0.0 ],[ 0.5, 0.5, 0.5 ],100,[ 0, 0, 0 ],1.0)
-                circle.meshDrawer.setLightDir_old(0,-1,1)*/
+                circle.meshDrawer.setLightDir_old(0,-1,1)
                 
                 table = new Table(0,0.3,0.42);
                 table.meshDrawer.setMaterial([ 0.8, 0.8, 0.2 ],[ 1, 1, 1 ],100,[ 0, 0, 0 ],1.0)
@@ -374,19 +374,23 @@ var spheres = fixed_spheres.slice();*/
                     
                     }
                     if(circle){
-                        //circle.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-
-                        //circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                        //circle.boundingBox.draw(mvp);
+                        circle.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                        circle.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
                     
                     }
                     if(table){
-                    table.boundingBox.draw(mvp);
-                    //table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
-                    //table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    //table.boundingBox.draw(mvp);
+                    
+                    table.meshDrawer.setTrans([ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ]);
+                    table.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
                     
                     }
                     //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    if(testbb){
+                        testbb.draw(mvp);
 
+                    }
 
                 }
             	
@@ -516,14 +520,12 @@ var spheres = fixed_spheres.slice();*/
                 if ( param.files && param.files[0] ) {
                     var reader = new FileReader();
                     reader.onload = function(e) {
-                        console.log(e)
 
                         massSpring.setMesh( e.target.result );
                         DrawScene();
 
                     }
                     reader.readAsText( param.files[0] );
-                    console.log("finito");
                 }
             }
 
