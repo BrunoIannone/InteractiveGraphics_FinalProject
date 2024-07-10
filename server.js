@@ -14,8 +14,11 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname)));
 
-
-app.listen(3000, () => {
+app.listen(3000, async () => {
   console.log('Server avviato su http://localhost:3000/');
   console.log(__dirname);
+  
+  // Dynamically import the open module and use it
+  const open = (await import('open')).default;
+  open('http://localhost:3000/');
 });

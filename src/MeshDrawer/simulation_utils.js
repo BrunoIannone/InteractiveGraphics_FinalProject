@@ -56,21 +56,20 @@ function SimTimeStep(dt, positions, velocities, springs, stiffness, damping, par
 
 function areBoundingBoxesColliding(bbox1, bbox2) {
     return !(bbox1.max[0] <= bbox2.min[0] || // bbox1 è a sinistra di bbox2
-        bbox1.min[0] >= bbox2.max[0] || // bbox1 è a destra di bbox2
-        bbox1.max[1] <= bbox2.min[1] || // bbox1 è sotto bbox2
-        bbox1.min[1] >= bbox2.max[1] || // bbox1 è sopra bbox2
-        bbox1.max[2] <= bbox2.min[2] || // bbox1 è dietro bbox2
-        bbox1.min[2] >= bbox2.max[2]);  // bbox1 è davanti a bbox2
+        bbox1.min[0] >= bbox2.max[0] || // bbox1 right w.r.t bbox2
+        bbox1.max[1] <= bbox2.min[1] || // bbox1 under bbox2
+        bbox1.min[1] >= bbox2.max[1] || // bbox1 over bbox2
+        bbox1.max[2] <= bbox2.min[2] || // bbox1 behind bbox2
+        bbox1.min[2] >= bbox2.max[2]);  // bbox1 in front of bbox2
 }
 
 function isBoundingBoxInside(bbox1, bbox2, threshold = 0) {
-    // Aggiungi la threshold ai limiti della seconda bounding box
     let minThreshold = bbox2.min.map((val) => val - threshold);
     let maxThreshold = bbox2.max.map((val) => val + threshold);
 
-    return (bbox1.min[0] >= minThreshold[0] && bbox1.max[0] <= maxThreshold[0] && // bbox1 è dentro bbox2 lungo l'asse x
-        bbox1.min[1] >= minThreshold[1] && bbox1.max[1] <= maxThreshold[1] && // bbox1 è dentro bbox2 lungo l'asse y
-        bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 è dentro bbox2 lungo l'asse z
+    return (bbox1.min[0] >= minThreshold[0] && bbox1.max[0] <= maxThreshold[0] && // bbox1 inside bbox2 along x-axis
+        bbox1.min[1] >= minThreshold[1] && bbox1.max[1] <= maxThreshold[1] && // bbox1 inside bbox2 along y-axis
+        bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 inside bbox2 along z-axis
 }
 
 function isBoundingBoxHigherThan(zValue, bbox) {
@@ -173,14 +172,14 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].x *= -restitution;
         }
 
-        if (positions[i].y < boundingBox.min[2] + translation.y) { // Scambio z <-> y corretto
+        if (positions[i].y < boundingBox.min[2] + translation.y) { 
             y0 = boundingBox.min[2] + translation.y;
             h = y0 - positions[i].y;
             positions[i].y = restitution * h + y0;
             velocities[i].y *= -restitution;
         }
 
-        if (positions[i].z < boundingBox.min[1] + translation.z) { // Scambio y <-> z corretto
+        if (positions[i].z < boundingBox.min[1] + translation.z) { 
             z0 = boundingBox.min[1] + translation.z;
             h = z0 - positions[i].z;
             positions[i].z = restitution * h + z0;
@@ -195,14 +194,14 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].x *= -restitution;
         }
 
-        if (positions[i].y > boundingBox.max[2] + translation.y) { // Scambio z <-> y corretto
+        if (positions[i].y > boundingBox.max[2] + translation.y) { 
             y0 = boundingBox.max[2] + translation.y;
             h = positions[i].y - y0;
             positions[i].y = y0 - restitution * h;
             velocities[i].y *= -restitution;
         }
 
-        if (positions[i].z > boundingBox.max[1] + translation.z) { // Scambio y <-> z corretto
+        if (positions[i].z > boundingBox.max[1] + translation.z) { 
             z0 = boundingBox.max[1] + translation.z;
             h = positions[i].z - z0;
             positions[i].z = z0 - restitution * h;
