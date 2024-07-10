@@ -4,11 +4,11 @@
     <head>
         <title>Basketball_reboot</title>
         <link rel="stylesheet" href="Style/index.css">
+
+        <!-- IMPORT -->
+
         <script type="text/javascript" src="Matrix_Utils/matrix_utils.js"></script>
         <script type="text/javascript" src="ScreenQuad/screen_quad.js"></script>
-        <script type="text/javascript" src="Spheres/sphere.js"></script>
-        <script type="text/javascript" src="RayTracing/ray_tracing.js"></script>
-        <script type="text/javascript" src="project6.js"></script>
         <script type="text/javascript" src="project7.js"></script>
         <script type="text/javascript" src="obj.js"></script>
         <script type="text/javascript" src="Cube/vertex_selection_color.js"></script>
@@ -20,35 +20,21 @@
         <script type="text/javascript" src="Basket/circle_mesh_drawer.js"></script>
         <script type="text/javascript" src="Basket/table_mesh_drawer.js"></script>
         <script type="text/javascript" src="Basket/net_mesh_drawer.js"></script>
-
         <script type="text/javascript" src="Arena/arena.js"></script>
         <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
         <script type="text/javascript" src="Vec3/vec3.js"></script>
         <!-- -- -->
-        <script id="envFS" type="x-shader/x-fragment">
-            precision mediump float;
-            varying vec3 ray_dir;
-            uniform samplerCube envMap;
-            void main()
-            {
-                gl_FragColor = textureCube( envMap, ray_dir.xzy );
-            }
-        </script>
 
-        <!-- -- -->
-
-        <!-- VARIABILI -->
+        <!-- DECLARATIONS -->
         <script>
             var viewRotX = 0, viewRotZ = 0, transZ = 3, transY = 0, MV;
             const transZmin = 1.001;
             const transZmax = 10;
             var canvas, gl, background, perspectiveMatrix;
-            var sphereDrawer, circle, table, net;//,triSphere;
-            //var environmentTexture;
-            const maxBounceLimit = 16;
+            var circle, table, net;//,triSphere;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox, arena_size = 3;
-            var massSpring, MVP, lightView, testbb, collide = true;
+            var massSpring, lightView, testbb, collide = true;
             var metal_audio, isPlayingMetal = false, net_audio, isPlayingNet = false, bounce_audio, isPlayingBounce = false, bounce = true;
             //var spheres;
 
@@ -59,9 +45,6 @@
                 }
 
             ];
-
-
-
         </script>
         <!-- --------- -->
 
@@ -161,7 +144,6 @@
 
                 MV = GetModelViewMatrix(0, transY, transZ, viewRotX, viewRotZ);
                 var trans = GetTrans();
-                MVP = MatrixMult(perspectiveMatrix, trans.worldToCam);
                 background.updateProj(fov, (n + f) / 2);
 
             }
