@@ -4,7 +4,7 @@ class Circle{
 		this.boundingBox = new BoundingBox(0,0,0);
 		this.boundingBox.setSwap(true);
 
-        this.LoadObj("http://localhost:3000/Cerchio.obj");
+        this.LoadObj("http://localhost:3000/assets/circle.obj");
     }
 
     LoadObj(path) {

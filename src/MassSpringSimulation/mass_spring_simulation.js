@@ -28,7 +28,6 @@ class MassSpring {
 		this.mesh = new ObjMesh;
 		this.mesh.parse( objdef );
 		var box = this.mesh.getBoundingBox();
-		//console.log(box)
 		var shift = [
 			-(box.min[0]+box.max[0])/2,
 			-(box.min[1]+box.max[1])/2,
@@ -53,7 +52,6 @@ class MassSpring {
 		
 		this.reset();
 		this.initSprings();
-		//DrawScene();
 
 	}
 	initSprings()

@@ -2,7 +2,7 @@ class Net{
     constructor(){
         this.meshDrawer = new NetMeshDrawer();
 
-        this.LoadObj("http://localhost:3000/Rete.obj");
+        this.LoadObj("http://localhost:3000/assets/net.obj");
     }
 
     /*LoadObj( param )

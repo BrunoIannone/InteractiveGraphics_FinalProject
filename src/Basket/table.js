@@ -1,7 +1,7 @@
 class Table {
 	constructor(x_offset, y_offset, z_offset) {
 		this.meshDrawer = new TableMeshDrawer();
-		this.LoadObj("http://localhost:3000/Tabellone.obj");
+		this.LoadObj("http://localhost:3000/assets/table.obj");
 		this.boundingBox = new BoundingBox(x_offset, y_offset, z_offset);
 		this.boundingBox.setSwap(true);
 
