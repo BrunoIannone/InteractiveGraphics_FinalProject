@@ -1,125 +1,273 @@
 <doctype html>
-<!-- Copyright 2020, Cem Yuksel, University of Utah -->
-<html>
-<head>
-<title>Basketball</title>
-<link rel="stylesheet" href="Style/index.css">
+    <html>
 
-<script type="text/javascript" id="includedscript" src="project7.js"></script>
-<script type="text/javascript" src="obj.js"></script>
+    <head>
+        <title>Basketball_reboot</title>
+        <link rel="stylesheet" href="Style/index.css">
+        <script type="text/javascript" src="Matrix_Utils/matrix_utils.js"></script>
+        <script type="text/javascript" src="ScreenQuad/screen_quad.js"></script>
+        <script type="text/javascript" src="Spheres/sphere.js"></script>
+        <script type="text/javascript" src="RayTracing/ray_tracing.js"></script>
+        <script type="text/javascript" src="project6.js"></script>
+        <script type="text/javascript" src="project7.js"></script>
+        <script type="text/javascript" src="obj.js"></script>
+        <script type="text/javascript" src="Cube/vertex_selection_color.js"></script>
+        <script type="text/javascript" src="Light/light.js"></script>
+        <script type="text/javascript" src="BoundingBox/boundingbox.js"></script>
+        <script type="text/javascript" src="Basket/circle.js"></script>
+        <script type="text/javascript" src="Basket/table.js"></script>
+        <script type="text/javascript" src="Basket/net.js"></script>
+        <script type="text/javascript" src="Basket/circle_mesh_drawer.js"></script>
+        <script type="text/javascript" src="Basket/table_mesh_drawer.js"></script>
+        <script type="text/javascript" src="Basket/net_mesh_drawer.js"></script>
 
-<!--Script for drawing the arena -->
-<script type="text/javascript" src="Arena/arena.js"></script>
+        <script type="text/javascript" src="Arena/arena.js"></script>
+        <script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
+        <script type="text/javascript" src="Vec3/vec3.js"></script>
+        <!-- -- -->
+        <script id="envFS" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec3 ray_dir;
+            uniform samplerCube envMap;
+            void main()
+            {
+                gl_FragColor = textureCube( envMap, ray_dir.xzy );
+            }
+        </script>
 
-<!--Script for drawing the white cube -->
-<script type="text/javascript" src="Cube/vertex_selection_color.js"></script>
+        <!-- -- -->
 
-<!--Script for WebGl initialization -->
-<script type="text/javascript" src="WebGl/init.js"></script>
+        <!-- VARIABILI -->
+        <script>
+            var viewRotX = 0, viewRotZ = 0, transZ = 3, transY = 0, MV;
+            const transZmin = 1.001;
+            const transZmax = 10;
+            var canvas, gl, background, perspectiveMatrix;
+            var sphereDrawer, circle, table, net;//,triSphere;
+            //var environmentTexture;
+            const maxBounceLimit = 16;
+            var primaryRT, secondaryRT;
+            var boxDrawer, showBox, arena_size = 3;
+            var massSpring, MVP, lightView, testbb, collide = true;
+            var metal_audio, isPlayingMetal = false, net_audio, isPlayingNet = false, bounce_audio, isPlayingBounce = false, bounce = true;
+            //var spheres;
 
-<!--Script for matrix utils function -->
-<script type="text/javascript" src="Matrix_Utils/matrix_utils.js"></script>
+            var lights = [
+                {
+                    position: [0, 0, 1000],
+                    intensity: [1, 1, 1]
+                }
 
-<!-- Light script -->
-<script type="text/javascript" src="Light/light.js"></script>
-<script type="text/javascript" src="Vec3/vec3.js"></script>
+            ];
 
-<script type="text/javascript" src="MassSpringSimulation/mass_spring_simulation.js"></script>
-<!--SHADER -->
-<script id="raytraceVS" type="x-shader/x-vertex">
-	attribute vec3 p;
-	uniform mat4 proj;
-	uniform mat4 c2w; //camera to world
-	varying vec3 ray_pos;
-	varying vec3 ray_dir;
-	void main()
-	{
-		gl_Position = proj * vec4(p,1);
-		vec4 rp = c2w * vec4(0,0,0,1);
-		ray_pos = rp.xyz;
-		vec4 rd = c2w * vec4(p,1);
-		ray_dir = rd.xyz - ray_pos;
-	}
-</script>
 
-<script id="envFS" type="x-shader/x-fragment">
-	precision mediump float;
-	varying vec3 ray_dir;
-	uniform samplerCube envMap;
-	void main()
-	{
-		gl_FragColor = textureCube( envMap, ray_dir.xzy );
-	}
-</script>
-<!-- -- -->
-<script>
-	var viewRotX = 0, viewRotZ = 0, transZ = 3;
-	const transZmin = 1.001;
-	const transZmax = 10;
-	var canvas, gl,showBox;
-	var perspectiveMatrix;
 
-	var environmentTexture;
-	var screenQuad = {
-		init(fov, z) {
-			if (!this.vbuf) this.vbuf = gl.createBuffer();
-			const r = canvas.width / canvas.height;
-			const ff = Math.PI * fov / 180;
-			const tant_2 = Math.tan(ff / 2);
-			const y = z * tant_2;
-			const x = y * r;
-			const rtp = [
-				-x, -y, -z,
-				x, -y, -z,
-				x, y, -z,
-				-x, -y, -z,
-				x, y, -z,
-				-x, y, -z,
-			];
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.vbuf);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(rtp), gl.STATIC_DRAW);
-		},
-		draw(prog, trans) {
-			gl.useProgram(prog);
-			gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'c2w'), false, trans.camToWorld);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.vbuf);
-			var p = gl.getAttribLocation(prog, 'p');
-			gl.vertexAttribPointer(p, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(p);
-			gl.drawArrays(gl.TRIANGLES, 0, 6);
-		}
-	};
+        </script>
+        <!-- --------- -->
 
-	var background = {
-		init() {
-			this.prog = InitShaderProgramFromScripts('raytraceVS', 'envFS');
-		},
-		updateProj() {
-			gl.useProgram(this.prog);
-			gl.uniformMatrix4fv(gl.getUniformLocation(this.prog, 'proj'), false, perspectiveMatrix);
-		},
-		draw(trans) {
-			gl.depthMask(true);
-			screenQuad.draw(this.prog, trans);
-			gl.depthMask(true);
-		}
-	};
+        <script>
+            function initSound() {
+                metal_audio = new Audio('assets/metal.mp3');
+                metal_audio.addEventListener('ended', function () {
+                    isPlayingMetal = false; // Reset del flag quando l'audio termina
+                });
+                net_audio = new Audio('assets/net.mp3');
+                net_audio.addEventListener('ended', function () {
+                    isPlayingNet = false; // Reset del flag quando l'audio termina
+                });
+                bounce_audio = new Audio('assets/bounce.mp3');
+                bounce_audio.addEventListener('ended', function () {
+                    isPlayingBounce = false; // Reset del flag quando l'audio termina
+                });
 
-</script>
-<!-- --------- -->
-<script type="text/javascript">
-///////////////////////////////////////////////////////////////////////////////////
-// Below are the main UI control functions.
-///////////////////////////////////////////////////////////////////////////////////
+            }
+            function initBasket() {
+                circle = new Circle();
+                circle.meshDrawer.setMaterial([1.0, 0.4, 0.0], [0.5, 0.5, 0.5], 100, [0, 0, 0], 1.0)
+                circle.meshDrawer.setLightDir_old(0, -1, 1)
 
-var showBox;
-var drawers = new Array();
-var pdrawer = new Array();
-var massSpring, massSpring2;
-window.onload = function () {
-				showBox = document.getElementById('show-box');
+                table = new Table(0, 0.3, 0.42);
+                table.meshDrawer.setMaterial([0.8, 0.8, 0.2], [1, 1, 1], 100, [0, 0, 0], 1.0)
+                table.meshDrawer.setLightDir_old(0, 0, -1)
+
+                // net = new Net();
+                // net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1.0,[ 0, 0, 0 ],1.0)
+                // net.meshDrawer.setLightDir_old(0,-1,1)
+            }
+            function InitWebGL() {
+                // Initialize the WebGL canvas
+                canvas = document.getElementById("canvas");
+                canvas.oncontextmenu = function () { return false; };
+                gl = canvas.getContext("webgl2", { antialias: false, depth: true });	// Initialize the GL context
+                if (!gl) {
+                    alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+                    return;
+                }
+
+                // Initialize settings
+                gl.clearColor(0, 0, 0, 0);
+                gl.enable(gl.DEPTH_TEST);
+
+                background = new BackGround(gl);
+                background.InitEnvironmentMap();
+
+
+                UpdateCanvasSize();
+                initSound()
+                initBasket();
+
+
+                boxDrawer = new BoxDrawer()
+                massSpring = new MassSpring(false, "1");
+                massSpring.meshDrawer.setLightDir_old(0, 0, 1)
+                //massSpring.meshDrawer.setLightDir([0,0,1000],[1,1,1])
+                //massSpring.meshDrawer.setMaterial([ 0.5, 0.5, 0.0 ],[ 0.8, 0.8, 0.8 ],100,[ 0, 0, 0 ],1.0)
+                massSpring.meshDrawer.showTexture(false);
+                SetGravity(document.getElementById('gravity'));
+                SetMass(document.getElementById('mass'));
+                SetStiffness(document.getElementById('stiffness'));
+
+                DrawScene();
+            }
+            function UpdateCanvasSize() {
+                canvas.style.width = "100%";
+                canvas.style.height = "100%";
+                const pixelRatio = window.devicePixelRatio || 1;
+                canvas.width = pixelRatio * canvas.clientWidth;
+                canvas.height = pixelRatio * canvas.clientHeight;
+                const width = (canvas.width / pixelRatio);
+                const height = (canvas.height / pixelRatio);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                UpdateProjectionMatrix();
+            }
+            function UpdateProjectionMatrix() {
+                const fov = 60;
+                var r = canvas.width / canvas.height;
+                var n = 0.1;
+                const min_n = 0.001;
+                if (n < min_n) n = min_n;
+                var f = transZmax * 100;
+                var ff = Math.PI * fov / 180;
+                var tant_2 = Math.tan(ff / 2);
+                var s = 1 / tant_2;
+                perspectiveMatrix = [
+                    s / r, 0, 0, 0,
+                    0, s, 0, 0,
+                    0, 0, -(n + f) / (f - n), -1,
+                    0, 0, -2 * n * f / (f - n), 0
+                ];
+
+                MV = GetModelViewMatrix(0, transY, transZ, viewRotX, viewRotZ);
+                var trans = GetTrans();
+                MVP = MatrixMult(perspectiveMatrix, trans.worldToCam);
+                background.updateProj(fov, (n + f) / 2);
+
+            }
+            function drawBackground() {
+                gl.flush();
+                var trans = GetTrans();
+                background.draw(trans);
+
+            }
+            function DrawScene() {
+                gl.flush();
+
+                var trans = GetTrans();
+                var mvp = MatrixMult(perspectiveMatrix, trans.worldToCam);
+                var nrm = [MV[0], MV[1], MV[2], MV[4], MV[5], MV[6], MV[8], MV[9], MV[10]];
+
+
+                // Clear the screen and the depth buffer.
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                if (background) {
+                    background.draw(trans);
+                }
+                if (showBox.checked) {
+                    boxDrawer.draw(mvp);
+                }
+                // Rasterization
+                if (document.getElementById('raster').checked) {
+
+                    if (massSpring) {
+                        massSpring.boundingBox.draw(mvp);
+                        massSpring.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
+                        massSpring.pointDrawer.draw(mvp);
+                    }
+                    if (circle) {
+                        //circle.boundingBox.draw(mvp);
+                        circle.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
+                        circle.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
+                    }
+                    if (table) {
+                        table.boundingBox.draw(mvp);
+                        table.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
+                        table.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
+                    }
+                    //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    if (testbb) {
+                        testbb.draw(mvp);
+                    }
+
+                }
+
+            }
+
+            function InitShaderProgramFromScripts(vs, fs) {
+                return InitShaderProgram(document.getElementById(vs).text, document.getElementById(fs).text);
+            }
+
+            // This is a helper function for compiling the given vertex and fragment shader source code into a program.
+            function InitShaderProgram(vsSource, fsSource) {
+                const vs = CompileShader(gl.VERTEX_SHADER, vsSource);
+                const fs = CompileShader(gl.FRAGMENT_SHADER, fsSource);
+
+                if (!vs || !fs) return null;
+
+                const prog = gl.createProgram();
+                gl.attachShader(prog, vs);
+                gl.attachShader(prog, fs);
+                gl.linkProgram(prog);
+
+                if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+                    alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(prog));
+                    return null;
+                }
+                return prog;
+            }
+
+            // This is a helper function for compiling a shader, called by InitShaderProgram().
+            function CompileShader(type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    alert('An error occurred compiling shader:\n' + gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+
+
+        </script>
+
+        <script>
+
+
+            window.onload = function () {
+                document.addEventListener('keydown', function (event) {
+                    if (event.code === 'Space') {
+                        massSpring.reset();
+                    }
+                });
+                showBox = document.getElementById('show-box');
+                document.getElementById('show-texture').checked = false;
 
                 InitWebGL();
+
                 canvas.zoom = function (s) {
                     transZ *= s / canvas.height + 1;
                     if (transZ < transZmin) transZ = transZmin;
@@ -129,11 +277,11 @@ window.onload = function () {
                 }
                 canvas.onwheel = function () { canvas.zoom(0.3 * event.deltaY); }
                 canvas.onmousedown = function () {
-					if ( massSpring.mouseDown() || massSpring2.mouseDown() ) {
-						canvas.ondblclick = null;
-						return;
-					}
-					canvas.ondblclick = canvas.resetView;
+                    if (massSpring.mouseDown()) {
+                        canvas.ondblclick = null;
+                        return;
+                    }
+                    canvas.ondblclick = canvas.resetView;
 
                     var cx = event.clientX;
                     var cy = event.clientY;
@@ -156,219 +304,207 @@ window.onload = function () {
                         }
                     }
                 }
-	canvas.onmouseup = canvas.onmouseleave = function() {
-		massSpring.mouseUp();
-		massSpring2.mouseUp();
+                canvas.onmouseup = canvas.onmouseleave = function () {
+                    massSpring.mouseUp();
+                    canvas.onmousemove = function () { massSpring.mouseMove(); }
+                }
 
-		canvas.onmousemove = function() { massSpring.mouseMove(); massSpring2.mouseMove();}
-	}
-	canvas.onmousemove = function() { massSpring.mouseMove();massSpring2.mouseMove(); }
-	canvas.resetView = function() {
-		viewrotX = 0;
-		viewrotY = 0;
-		transY = 0;
-		transZ = 3;
-		
-		UpdateProjectionMatrix();
-		DrawScene();
-	}
-	
-	massSpring = new MassSpring(true,"1");
-	drawers.push(massSpring.meshDrawer);
-	pdrawer.push(massSpring.pointDrawer);
-
-	massSpring2 = new MassSpring(true,"2");
-	drawers.push(massSpring2.meshDrawer);
-	pdrawer.push(massSpring2.pointDrawer);
-
-	
-	SetGravity  ( document.getElementById('gravity') );
-	SetMass     ( document.getElementById('mass') );
-	SetStiffness( document.getElementById('stiffness') );
-	SetShininess( document.getElementById('shininess-exp') );
-
-	DrawScene();
-};
-function WindowResize()
-{
-	UpdateCanvasSize();
-	DrawScene();
-}
-function UseEnvironmentMap(param) {
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP, param.checked ? environmentTexture : null);
+            };
+            function WindowResize() {
+                UpdateCanvasSize();
                 DrawScene();
             }
-function MousePos()
-{
-	return {
-		x:  ( event.clientX / canvas.clientWidth  ) * 2 - 1,
-		y: -( event.clientY / canvas.clientHeight ) * 2 + 1
-	};
-}
+            function MousePos() {
+                return {
+                    x: (event.clientX / canvas.clientWidth) * 2 - 1,
+                    y: -(event.clientY / canvas.clientHeight) * 2 + 1
+                };
+            }
 
-function ShowTexture( param )
-{
-	meshDrawer.showTexture( param.checked );
-	DrawScene();
-}
+            function ShowTexture(param) {
+                massSpring.meshDrawer.showTexture(param.checked);
+                DrawScene();
+            }
+            function LoadObj(param) {
+                if (param.files && param.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
 
-function LoadObj( param )
-{
-	if ( param.files && param.files[0] ) {
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			massSpring.setMesh( e.target.result );
-			massSpring2.setMesh( e.target.result );
-		}
-		reader.readAsText( param.files[0] );
-	}
-}
+                        massSpring.setMesh(e.target.result);
+                        DrawScene();
 
-function LoadTexture( param )
-{
-	if ( param.files && param.files[0] ) {
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			var img = document.getElementById('texture-img');
-			img.onload = function() {
-				meshDrawer.setTexture( img );
-				DrawScene();
-			}
-			img.src = e.target.result;
-		};
-		reader.readAsDataURL( param.files[0] );
-	}
-}
+                    }
+                    reader.readAsText(param.files[0]);
+                }
+            }
 
-function SetTimeStepSize( param )
-{
-	var s = param.value;
-	document.getElementById('timestep-value').innerText = s + " ms";
-}
+            function LoadTexture(param) {
+                if (param.files && param.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = document.getElementById('texture-img');
+                        img.onload = function () {
 
-function SetGravity( param )
-{
-	var v = param.value;
-	var s = v / 20;
-	document.getElementById('gravity-value').innerText = s.toFixed( 2 );
-	massSpring.gravity.y = -s;
-	massSpring2.gravity.y = -s;
-}
 
-function SetMass( param )
-{
-	var v = param.value;
-	var s = v / 200;
-	document.getElementById('mass-value').innerText = s.toFixed( 3 );
-	massSpring.mass = s;
-	massSpring2.mass = s;
+                            massSpring.meshDrawer.setTexture(img);
+                            var checkbox = document.getElementById('show-texture');
+                            checkbox.checked = true;
 
-}
+                            // Trigger the onchange event
+                            var event = new Event('change');
+                            checkbox.dispatchEvent(event);
+                            DrawScene();
+                        }
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(param.files[0]);
 
-function SetStiffness( param )
-{
-	var v = param.value;
-	var s = v / 20;
-	document.getElementById('stiffness-value').innerText = s.toFixed( 2 );
-	massSpring.stiffness = s;
-	massSpring2.stiffness = s;
+                }
+            }
 
-}
 
-function SetDamping( param )
-{
-	var v = param.value;
-	var s = v / 20;
-	document.getElementById('damping-value').innerText = s.toFixed( 2 );
-	massSpring.damping = s;
-	massSpring2.damping = s;
+            function ShowControls() {
+                var c = document.getElementById('controls');
+                c.style.display = c.style.display == 'none' ? '' : 'none';
+            }
+            function SetGravity(param) {
+                var v = param.value;
+                var s = v / 20;
+                document.getElementById('gravity-value').innerText = s.toFixed(2);
+                massSpring.gravity.y = -s;
+            }
 
-}
+            function SetMass(param) {
+                var v = param.value;
+                var s = v / 200;
+                document.getElementById('mass-value').innerText = s.toFixed(3);
+                massSpring.mass = s;
+            }
 
-function SetShininess( param )
-{
-	var exp = param.value;
-	var s = Math.pow(10,exp/25);
-	document.getElementById('shininess-value').innerText = s.toFixed( s < 10 ? 2 : 0 );
-	meshDrawer.setShininess(s);
-	DrawScene();
-}
+            function SetStiffness(param) {
+                var v = param.value;
+                var s = v / 20;
+                document.getElementById('stiffness-value').innerText = s.toFixed(2);
+                massSpring.stiffness = s;
+            }
 
-///////////////////////////////////////////////////////////////////////////////////
+            function SetDamping(param) {
+                var v = param.value;
+                var s = v / 20;
+                document.getElementById('damping-value').innerText = s.toFixed(2);
+                massSpring.damping = s;
+            }
+
+            function SetShininess(param) {
+                var exp = param.value;
+                var s = Math.pow(10, exp / 25);
+                document.getElementById('shininess-value').innerText = s.toFixed(s < 10 ? 2 : 0);
+                meshDrawer.setShininess(s);
+            }
+            function SetTimeStepSize(param) {
+                var s = param.value;
+                document.getElementById('timestep-value').innerText = s + " ms";
+            }
+        </script>
+
+        <script id="sphereee" type="text/obj">
+    v  -1  1 -1
+	v  -1 -1 -1
+	v   1 -1 -1
+	v   1  1 -1
+	v   1 -1  1
+	v  -1 -1  1
+	v  -1  1  1
+	v   1  1  1
+	vn  0  0  1
+	vn  0  0  1
+	vn  0  0  1
+	vn  0  0  1
+	vn  0  0 -1
+	vn  0  0 -1
+	vn  0  0 -1
+	vn  0  0 -1
+	vn  0  1  0
+	vn  0  1  0
+	vn  0  1  0
+	vn  0  1  0
+	vn -1  0  0
+	vn -1  0  0
+	vn -1  0  0
+	vn -1  0  0
+	vn  0 -1  0
+	vn  0 -1  0
+	vn  0 -1  0
+	vn  0 -1  0
+	vn  1  0  0
+	vn  1  0  0
+	vn  1  0  0
+	vn  1  0  0
+	vt 0 0
+	vt 0 1
+	vt 1 1
+	vt 1 0
+	f 1/1/1  4/4/4  3/3/3  2/2/2  
+	f 5/1/5  8/4/8  7/3/7  6/2/6  
+	f 3/1/9  5/4/12 6/3/11 2/2/10 
+	f 4/1/13 8/4/16 5/3/15 3/2/14 
+	f 1/1/17 7/4/20 8/3/19 4/2/18 
+	f 2/1/21 6/4/24 7/3/23 1/2/22 
 </script>
+    </head>
 
-<script id="box.obj" type="text/obj">
-v  -1  1 -1
-v  -1 -1 -1
-v   1 -1 -1
-v   1  1 -1
-v   1 -1  1
-v  -1 -1  1
-v  -1  1  1
-v   1  1  1
-vn  0  0  1
-vn  0  0  1
-vn  0  0  1
-vn  0  0  1
-vn  0  0 -1
-vn  0  0 -1
-vn  0  0 -1
-vn  0  0 -1
-vn  0  1  0
-vn  0  1  0
-vn  0  1  0
-vn  0  1  0
-vn -1  0  0
-vn -1  0  0
-vn -1  0  0
-vn -1  0  0
-vn  0 -1  0
-vn  0 -1  0
-vn  0 -1  0
-vn  0 -1  0
-vn  1  0  0
-vn  1  0  0
-vn  1  0  0
-vn  1  0  0
-vt 0 0
-vt 0 1
-vt 1 1
-vt 1 0
-f 1/1/1  4/4/4  3/3/3  2/2/2  
-f 5/1/5  8/4/8  7/3/7  6/2/6  
-f 3/1/9  5/4/12 6/3/11 2/2/10 
-f 4/1/13 8/4/16 5/3/15 3/2/14 
-f 1/1/17 7/4/20 8/3/19 4/2/18 
-f 2/1/21 6/4/24 7/3/23 1/2/22 
-</script>
+    <body onresize="WindowResize()">
+        <div id="canvas-div"><canvas id="canvas"></canvas></div>
+        <div id="controls-div">
+            <div id="buttons"><input type="button" value="V" onclick="ShowControls()" /></div>
+            <div id="controls">
+                <div class="control-group">
+                    <div class="control"><input id="raster" name="method" type="radio" onchange="DrawScene()"
+                            checked /><label for="raster"> Rasterization</label><br /></div>
+                    <div class="control">
+                        <hr />
+                    </div>
 
-</head>
-<body onresize="WindowResize()">
-<div id="canvas-div"><canvas id="canvas"></canvas></div><div id="controls-div">
-<div id="controls">
-<div class="control-group"><canvas id="lightcontrol"></canvas><div id="lightcontrol-label">Light Direction</div></div>
-<div class="control-group">
-<div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this); massSpring2.toggleSimulation(this)"></div>
-<div class="control"><input type="button" value="Reset" onclick="massSpring.reset();massSpring2.reset();DrawScene()"></div>
-<div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation();massSpring2.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
-<div class="control"><span id="gravity-label">Gravity:</span><span class="value" id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20" oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()"/></div>
-<div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
-<div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
-<div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>
-</div>
-<div class="control-group">
-<div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()" checked /><label for="show-box"> Show Box</label></div>
-<div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)" checked /><label for="show-texture"> Show Texture</label></div>
-<div class="control"><span id="shininess-label">Shininess:</span><span class="value" id="shininess-value">1</span><input id="shininess-exp" type="range" min="0" max="100" value="50" oninput="SetShininess(this)" ondblclick="this.value=50;this.oninput()"/></div>
-<div class="control">OBJ model:<br/><input id="obj" type="file" onchange="LoadObj(this)" accept=".obj"/></div>
-<div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
-<div class="control"><img id="texture-img" /></div>
-<div class="control"><input id="envmap" name="envmap" type="checkbox" onchange="UseEnvironmentMap(this)"
-	checked /><label for="envmap"> Environment Map</label></div>
+                </div>
+                <div class="control-group">
 
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+                    <div class="control"><span id="timestep-label">Time Step Size:</span><span class="value"
+                            id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100"
+                            value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()"
+                            ondblclick="this.value=20;this.oninput();this.onchange()" /></div>
+                    <div class="control"><span id="gravity-label">Gravity:</span><span class="value"
+                            id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20"
+                            oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()" /></div>
+                    <div class="control"><span id="mass-label">Mass:</span><span class="value"
+                            id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20"
+                            oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()" /></div>
+                    <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value"
+                            id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20"
+                            oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()" /></div>
+                    <div class="control"><span id="damping-label">Damping:</span><span class="value"
+                            id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20"
+                            oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()" /></div>
+                    <div class="control"><input type="button" value="Start Simulation"
+                            onclick="massSpring.toggleSimulation(this)"></div>
+                    <div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()">
+                    </div>
+
+                    <div class="control">OBJ model:<br /><input id="obj" type="file" onchange="LoadObj(this)"
+                            accept=".obj" /></div>
+                    <div class="control">Texture image:<br /><input id="texture" type="file"
+                            onchange="LoadTexture(this)" accept="image/*" /></div>
+                    <div class="control"><img id="texture-img" /></div>
+                    <div class="control"><input id="show-texture" name="show-texture" type="checkbox"
+                            onchange="ShowTexture(this)" /><label for="show-texture"> Show Texture</label></div>
+                    <div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()"
+                            checked /><label for="show-box"> Show boundaries</label></div>
+
+                    <div class="control" id="score">Score: 0<br /></div>
+
+                </div>
+            </div>
+        </div>
+        </div>
+    </body>
+
+    </html>
