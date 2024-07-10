@@ -21,21 +21,13 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 
 }
 
-
-// [TO-DO] Complete the implementation of the following class.
-
 class CircleMeshDrawer
 {
-	// The constructor is a good place for taking care of the necessary initializations.
-	//commit
 	constructor()
 	{
         
-        
-		// [TO-DO] initializations
-		// Compile the shader program
 		this.prog = InitShaderProgram(CircleMeshVS, CircleMeshFS);
-		//console.log(["MESH",this.prog]);
+		
 		// Get the ids of the uniform variables in the shaders. In this case, the transformation matrix named "mvp","mv","mn"
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 		this.mv = gl.getUniformLocation(this.prog, 'mv');
@@ -52,6 +44,7 @@ class CircleMeshDrawer
 
 		// Get the GPU memory position of the texture position attribute from the VS code
 		this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
+		
 		// Get the GPU memory position of the normal position attribute from the VS code
 		this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
 
@@ -86,9 +79,6 @@ class CircleMeshDrawer
 	// Note that this method can be called multiple times.
 	setMesh( vertPos, texCoords, normals )
 	{
-		//console.log("IO",normals)
-		// [TO-DO] Update the contents of the vertex buffer objects.
-		// [TO-DO] Update the contents of the vertex buffer objects.
 		this.vertPoslength = vertPos.length; // Storing this information is important for drawing step
 		gl.useProgram(this.prog);
 
@@ -108,19 +98,20 @@ class CircleMeshDrawer
 	// The argument is a boolean that indicates if the checkbox is checked.
 	swapYZ( swap )
 	{
-		// [TO-DO] Set the uniform parameter(s) of the vertex shader
 		gl.useProgram(this.prog);
 
 		//Assign swap VS variable the swap value
 		var swap_location = gl.getUniformLocation(this.prog, 'swap');
 		gl.uniform1i(swap_location, swap);
 	}
+
 	setTrans( campos )
 	{
 		gl.useProgram(this.prog);
 
 		gl.uniform3fv( this.campos, campos );
 	}
+
 	// This method is called to draw the triangular mesh.
 	// The arguments are the model-view-projection transformation matrixMVP,
 	// the model-view transformation matrixMV, the same matrix returned
@@ -128,8 +119,6 @@ class CircleMeshDrawer
 	// transformation matrix, which is the inverse-transpose of matrixMV.
 	draw( matrixMVP, matrixMV, matrixNormal,campos )
 	{
-		// [TO-DO] Complete the WebGL initializations before drawing
-
 		gl.useProgram(this.prog);
 
 		gl.uniformMatrix4fv(this.mvp, false, matrixMVP); //Assign to mvp matrix, matrixMVP matrix (function input)
@@ -149,65 +138,14 @@ class CircleMeshDrawer
 		gl.activeTexture(gl.TEXTURE0);
 		
 		gl.uniform1i(textureSampler, 0);
-		//Drawing
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
-	}
-	
-	// This method is called to set the texture of the mesh.
-	// The argument is an HTML IMG element containing the texture data.
-	setTexture(img) {
-		console.log(img);
-    // Usa il programma shader
-    gl.useProgram(this.prog);
-
-    // Creazione e binding della texture 2D
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    // Imposta i parametri della texture 2D e carica l'immagine
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-    // Assegna i buffer delle coordinate texture
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
-    gl.vertexAttribPointer(this.texPosShader, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(this.texPosShader);
-
-    // Passaggio della texture 2D all'unità di texture 0
-    const textureSampler = gl.getUniformLocation(this.prog, "texture_sampler");
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.uniform1i(textureSampler, 0);
-
-    
-
-
-}
-
-	
-	// This method is called when the user changes the state of the
-	// "Show Texture" checkbox. 
-	// The argument is a boolean that indicates if the checkbox is checked.
-	showTexture( show )
-	{
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
-		//console.log("QUI",show)
-		gl.useProgram(this.prog);
-		//Assign usetext FS variable the show value
-		var usetext_location = gl.getUniformLocation(this.prog, "use_texture");
-		gl.uniform1i(usetext_location, show);
 	}
 	
 	// This method is called to set the incoming light direction
 	setLightDir_old( x, y, z )
 	{
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
-		//console.log([x,y,z])
 		gl.useProgram(this.prog);
 
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
 		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
 
 		gl.uniform3f(lightdir_location, x, z, y);
@@ -225,9 +163,7 @@ class CircleMeshDrawer
 	
 	// This method is called to set the shininess of the material
 	setShininess( shininess )
-	{
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the shininess.
-	
+	{	
 		gl.useProgram(this.prog);
 		var shininess_location = gl.getUniformLocation(this.prog, 'shininess');
 		gl.uniform1f(shininess_location, shininess);

@@ -145,69 +145,6 @@ class NetMeshDrawer
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
 	}
 	
-	// This method is called to set the texture of the mesh.
-	// The argument is an HTML IMG element containing the texture data.
-	setTexture(img) {
-		console.log(img);
-    // Usa il programma shader
-    gl.useProgram(this.prog);
-
-    // Creazione e binding della texture 2D
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    // Imposta i parametri della texture 2D e carica l'immagine
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-    // Assegna i buffer delle coordinate texture
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
-    gl.vertexAttribPointer(this.texPosShader, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(this.texPosShader);
-
-    // Passaggio della texture 2D all'unità di texture 0
-    const textureSampler = gl.getUniformLocation(this.prog, "texture_sampler");
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.uniform1i(textureSampler, 0);
-
-    
-
-
-}
-
-	
-	// This method is called when the user changes the state of the
-	// "Show Texture" checkbox. 
-	// The argument is a boolean that indicates if the checkbox is checked.
-	showTexture( show )
-	{
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify if it should use the texture.
-		//console.log("QUI",show)
-		gl.useProgram(this.prog);
-		//Assign usetext FS variable the show value
-		var usetext_location = gl.getUniformLocation(this.prog, "use_texture");
-		gl.uniform1i(usetext_location, show);
-	}
-	
-	// This method is called to set the incoming light direction
-	setLightDir_old( x, y, z )
-	{
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
-		//console.log([x,y,z])
-		gl.useProgram(this.prog);
-
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the light direction.
-		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
-
-		gl.uniform3f(lightdir_location, x, z, y);
-		//var swapped_lightdir_location = gl.getUniformLocation(this.prog, 'swapped_lightdir'); //Used for handling light direction when swap is true
-
-		//gl.uniform3f(swapped_lightdir_location, x, z, y);
-	
-	}
 	setLightDir( pos, intens )
 	{
 		gl.useProgram( this.prog );

@@ -27,16 +27,15 @@
 
         <!-- DECLARATIONS -->
         <script>
-            var viewRotX = 0, viewRotZ = 0, transZ = 3, transY = 0, MV;
+            var viewRotX = 0, viewRotZ = 0, transZ = 3, transY = 0, MV,MVP;
             const transZmin = 1.001;
             const transZmax = 10;
             var canvas, gl, background, perspectiveMatrix;
-            var circle, table, net;//,triSphere;
+            var circle, table, net;
             var primaryRT, secondaryRT;
             var boxDrawer, showBox, arena_size = 3;
             var massSpring, lightView, testbb, collide = true;
             var metal_audio, isPlayingMetal = false, net_audio, isPlayingNet = false, bounce_audio, isPlayingBounce = false, bounce = true;
-            //var spheres;
 
             var lights = [
                 {
@@ -144,15 +143,12 @@
 
                 MV = GetModelViewMatrix(0, transY, transZ, viewRotX, viewRotZ);
                 var trans = GetTrans();
+                MVP = MatrixMult(perspectiveMatrix, trans.worldToCam);
+
                 background.updateProj(fov, (n + f) / 2);
 
             }
-            function drawBackground() {
-                gl.flush();
-                var trans = GetTrans();
-                background.draw(trans);
-
-            }
+       
             function DrawScene() {
                 gl.flush();
 
