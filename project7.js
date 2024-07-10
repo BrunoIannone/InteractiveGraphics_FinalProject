@@ -313,7 +313,14 @@ function isBoundingBoxInside(bbox1, bbox2, threshold = 0) {
             bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 è dentro bbox2 lungo l'asse z
 }
 
-
+function isBoundingBoxHigherThan(zValue,bbox)
+{
+    const boundingBox = bbox;
+    if (boundingBox === null) {
+        return false; // or handle this case as needed
+    }
+    return boundingBox.max[2] > zValue;
+}
 function isBoundingBoxInsideSwapped(bbox1, bbox2, threshold = 0) {
     // Aggiungi la threshold ai limiti della seconda bounding box
     let minThreshold = bbox2.min.map((val) => val - threshold);

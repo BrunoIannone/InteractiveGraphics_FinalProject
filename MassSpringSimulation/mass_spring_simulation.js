@@ -159,13 +159,23 @@ class MassSpring {
 	// Definire i limiti della scena
 	var scene = {min:[-arena_size, -arena_size, -arena_size],
   	 max:[arena_size, arena_size, arena_size]};
-
+    
 
    	if(!isBoundingBoxInside(mesh_bbox,scene)){
+		console.log("OUT OF BOUND")
+		if(isBoundingBoxHigherThan(-1.0,mesh_bbox) ){
+			bounce = true;
+		}
 		//console.log("outofbound")
 		//var audio = new Audio('audio_file.mp3');
 		//audio.play();
 	   handleSceneCollisions(this.pos,this.restitution,this.vel)
+	   if(!isPlayingBounce && bounce){
+			console.log("NET SOUND")
+			bounce_audio.play(); // Riproduce l'audio
+			isPlayingBounce = true; // Imposta il flag a true
+			bounce = false
+	}
 	   collide = true;
 
    }
@@ -181,8 +191,8 @@ class MassSpring {
 		// [TO-DO] Handle collisions
 	testbb.createBoundingBox(circle.mesh.getBoundingBox())
 	if(this.checkCollision(mesh_bbox,table_bbox,0,0.42,0.3))	{
-		console.log("hit")
-		
+		//console.log("hit")
+		bounce = true;
 		handleObjectCollisions(this.pos,this.restitution,this.vel,table_bbox,new Vec3(0,0.42,0.3));
 		collide = true;	
 	}
@@ -194,12 +204,25 @@ class MassSpring {
 			console.log("circle inside")
 			//handleObjectCollisions(this.pos,this.restitution,this.vel,circle_bbox,new Vec3(0,0,0));
 			collide = false;
+			if(!isPlayingNet){
+				console.log("NET SOUND")
+				net_audio.play(); // Riproduce l'audio
+				isPlayingNet = true; // Imposta il flag a true
+			}
+			bounce = true
 
 		}
 		else{
 			if (collide){
 				handleCircleCollisions(this.pos,this.restitution,this.vel,circle_bbox,new Vec3(0,0,0));
+				// Controlla se l'audio non è in riproduzione
+				if (!isPlayingMetal && !isPlayingNet) {
+					//console.log("play")
+					console.log("METAL  SOUND")
 
+					metal_audio.play(); // Riproduce l'audio
+					isPlayingMetal = true; // Imposta il flag a true
+					bounce = true
 			}
 
 			
@@ -209,12 +232,12 @@ class MassSpring {
 	}
 	 
 	
-	
+}
 	
 	this.updateMesh();
 
 		//console.log("EELLLE",this.mesh.getBoundingBox());
-
+	
 	}
 	 checkCollision(bbox1, bbox2, x_offset, y_offset, z_offset) {
 		// bbox1 e bbox2 sono oggetti con struttura { min: [x1, y1, z1], max: [x2, y2, z2] }
