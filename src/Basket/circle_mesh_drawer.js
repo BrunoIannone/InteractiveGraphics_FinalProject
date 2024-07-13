@@ -178,15 +178,12 @@ attribute vec2 texture_pos; //Texture positions
 attribute vec3 normal_pos; //Normals positions
 
 uniform vec3 lightdir; //Light direction
-//uniform vec3 swapped_lightdir; //Light direction when swap is true
 
 uniform mat4 mvp; //Model-view-projection tranformation matrix
 uniform mat4 mv; // Model-view transformation matrix
 uniform mat3 mn; // Inverse transpose model-view transformation matrix
 uniform vec3 campos;
 
-//uniform float shininess; //Shininess value
-//uniform bool swap; //If true, swap Y-Z axes
 
 varying vec2 texCoord;
 varying vec3 normCoord;
@@ -196,15 +193,9 @@ varying vec3 vertexPos;
 
 void main()
 {
-	/*if (swap){
-		gl_Position = mvp * vec4(3*vertex_pos.x,3*vertex_pos.z,3*vertex_pos.y,1);
-		
-
-	}
-	else{*/
+	
 	gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y,1);		
 
-	//}
 	normCoord =  normal_pos;
 	viewVector = normalize(campos - vertex_pos);
 	texCoord = texture_pos;
@@ -216,30 +207,28 @@ void main()
 // Fragment shader source code for mesh
 var CircleMeshFS = `
 precision mediump float;
-uniform sampler2D texture_sampler;
-uniform bool use_texture;
-uniform samplerCube envMap;
-uniform vec3 campos;
 
-uniform mat4 mvp;
-
-//uniform float shininess;
-uniform vec3 lightdir;
-//uniform vec3 swapped_lightdir;
-//uniform bool swap;
-
-varying vec2 texCoord;
-varying vec3 normCoord;
-varying vec3 vertexPos;
 struct Material {
     vec3  k_d;	// diffuse coefficient
     vec3  k_s;	// specular coefficient
     float n;	// specular exponent
 };
+
+uniform sampler2D texture_sampler;
+uniform bool use_texture;
+uniform samplerCube envMap;
+uniform vec3 campos;
+uniform mat4 mvp;
+uniform vec3 lightdir;
 uniform Material mtl;
 
+varying vec2 texCoord;
+varying vec3 normCoord;
+varying vec3 vertexPos;
 varying vec3 viewVector;
+
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl);
+
 // Blinn Shading function
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl){
 
@@ -250,18 +239,17 @@ vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material m
 			return c;
 }
 void main() {
-	vec3 lightdir_;
 	
-		lightdir_ = lightdir - vertexPos;
+	vec3 lightdir_ = lightdir - vertexPos;
 	vec3 intensity = vec3(1.0, 1.0, 1.0);
 	vec3 color = BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normalize(normCoord),  intensity, mtl);
+	
 	if ( mtl.k_s.r + mtl.k_s.g + mtl.k_s.b > 0.0 ) {
 		vec3 normCoord_ = normalize(normCoord);
-
 		vec3 dir = reflect( -vec3(viewVector.x, viewVector.y, viewVector.z), normCoord_ );
 		color += mtl.k_s * textureCube( envMap, dir.xzy ).rgb;
 	}
+	
 	gl_FragColor = vec4(color,1);
-
 }
 `;

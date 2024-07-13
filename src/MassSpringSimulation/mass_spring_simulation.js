@@ -175,7 +175,7 @@ class MassSpring {
 		if (this.checkCollision(mesh_bbox, table_bbox, 0, 0.42, 0.3)) { // Look for collisions with the table
 			//console.log("hit")
 			bounce = true;
-			handleObjectCollisions(this.pos, this.restitution, this.vel, table_bbox, new Vec3(0, 0.42, 0.3));
+			handleObjectCollisions(this.pos, 0.1, this.vel, table_bbox, new Vec3(0, 0.42, 0.3));
 			collide = true;
 		}
 
@@ -197,7 +197,7 @@ class MassSpring {
 			}
 			else {
 				if (collide) {
-					handleCircleCollisions(this.pos, this.restitution, this.vel, circle_bbox, new Vec3(0, 0, 0));
+					handleCircleCollisions(this.pos, 0.1, this.vel, circle_bbox, new Vec3(0, 0, 0));
 					// Controlla se l'audio non è in riproduzione
 					if (!isPlayingMetal && !isPlayingNet) { //Play circle sound
 						//console.log("play")
