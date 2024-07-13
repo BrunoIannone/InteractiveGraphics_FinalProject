@@ -39,7 +39,6 @@
             var boxDrawer, showBox, arena_size = 3;
             var massSpring, lightView, testbb, collide = true;
             var metal_audio, isPlayingMetal = false, net_audio, isPlayingNet = false, bounce_audio, isPlayingBounce = false, bounce = true;
-
             var lights = [
                 {
                     position: [0, 0, 1000],
@@ -49,7 +48,7 @@
             ];
         </script>
         <!-- --------- -->
-
+        
         <script>
             function initSound() {
                 metal_audio = new Audio('assets/metal.mp3');
@@ -108,7 +107,7 @@
                 //massSpring.meshDrawer.setLightDir([0,0,1000],[1,1,1])
                 //massSpring.meshDrawer.setMaterial([ 0.5, 0.5, 0.0 ],[ 0.8, 0.8, 0.8 ],100,[ 0, 0, 0 ],1.0)
                 massSpring.meshDrawer.showTexture(false);
-                SetGravity(document.getElementById('gravity'));
+                //SetGravity(document.getElementById('gravity'));
                 SetMass(document.getElementById('mass'));
                 SetStiffness(document.getElementById('stiffness'));
 
@@ -172,7 +171,7 @@
                 if (document.getElementById('raster').checked) {
 
                     if (massSpring) {
-                        massSpring.boundingBox.draw(mvp);
+                        //massSpring.boundingBox.draw(mvp);
                         massSpring.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         massSpring.pointDrawer.draw(mvp);
                     }
@@ -182,15 +181,17 @@
                         circle.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
                     if (table) {
-                        table.boundingBox.draw(mvp);
+                        //table.boundingBox.draw(mvp);
                         table.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         table.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
                     //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
                     if (testbb) {
-                        testbb.draw(mvp);
+                        //testbb.draw(mvp);
                     }
-
+                    if(lightView){
+                        lightView.draw()
+                    }
                 }
 
             }
@@ -248,6 +249,7 @@
                 document.getElementById('show-texture').checked = false;
 
                 InitWebGL();
+                	lightView = new LightView();
 
                 canvas.zoom = function (s) {
                     transZ *= s / canvas.height + 1;
@@ -348,12 +350,14 @@
                 var c = document.getElementById('controls');
                 c.style.display = c.style.display == 'none' ? '' : 'none';
             }
-            function SetGravity(param) {
+            function SetGravity( param )
+            {
                 var v = param.value;
                 var s = v / 20;
-                document.getElementById('gravity-value').innerText = s.toFixed(2);
-                massSpring.gravity.y = -s;
+                document.getElementById('gravity-value').innerText = s.toFixed( 2 );
+                massSpring.gravity.z = -s;
             }
+
 
             function SetMass(param) {
                 var v = param.value;
@@ -434,58 +438,30 @@
 </script>
     </head>
 
-    <body onresize="WindowResize()">
-        <div id="canvas-div"><canvas id="canvas"></canvas></div>
-        <div id="controls-div">
-            <div id="buttons"><input type="button" value="V" onclick="ShowControls()" /></div>
-            <div id="controls">
-                <div class="control-group">
-                    <div class="control"><input id="raster" name="method" type="radio" onchange="DrawScene()"
-                            checked /><label for="raster"> Rasterization</label><br /></div>
-                    <div class="control">
-                        <hr />
-                    </div>
+   <body onresize="WindowResize()">
+<div id="canvas-div"><canvas id="canvas"></canvas></div><div id="controls-div">
+<div id="controls">
+<div class="control-group"><canvas id="lightcontrol"></canvas><div id="lightcontrol-label">Light Direction</div></div>
+<div class="control-group">
+<div class="control"><input id="raster" name="method" type="radio" onchange="DrawScene()" checked /><label for="raster"> Rasterization</label><br /></div>
 
-                </div>
-                <div class="control-group">
-
-                    <div class="control"><span id="timestep-label">Time Step Size:</span><span class="value"
-                            id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100"
-                            value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()"
-                            ondblclick="this.value=20;this.oninput();this.onchange()" /></div>
-                    <div class="control"><span id="gravity-label">Gravity:</span><span class="value"
-                            id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20"
-                            oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()" /></div>
-                    <div class="control"><span id="mass-label">Mass:</span><span class="value"
-                            id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20"
-                            oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()" /></div>
-                    <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value"
-                            id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20"
-                            oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()" /></div>
-                    <div class="control"><span id="damping-label">Damping:</span><span class="value"
-                            id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20"
-                            oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()" /></div>
-                    <div class="control"><input type="button" value="Start Simulation"
-                            onclick="massSpring.toggleSimulation(this)"></div>
-                    <div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()">
-                    </div>
-
-                    <div class="control">OBJ model:<br /><input id="obj" type="file" onchange="LoadObj(this)"
-                            accept=".obj" /></div>
-                    <div class="control">Texture image:<br /><input id="texture" type="file"
-                            onchange="LoadTexture(this)" accept="image/*" /></div>
-                    <div class="control"><img id="texture-img" /></div>
-                    <div class="control"><input id="show-texture" name="show-texture" type="checkbox"
-                            onchange="ShowTexture(this)" /><label for="show-texture"> Show Texture</label></div>
-                    <div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()"
-                            checked /><label for="show-box"> Show boundaries</label></div>
-
-                    <div class="control" id="score">Score: 0<br /></div>
-
-                </div>
-            </div>
-        </div>
-        </div>
-    </body>
-
+<div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this)"></div>
+<div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()"></div>
+<div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
+<div class="control"><span id="gravity-label">Gravity:</span><span class="value" id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20" oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()"/></div>
+<div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
+<div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
+<div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>
+</div>
+<div class="control-group">
+<div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()" checked /><label for="show-box"> Show Box</label></div>
+<div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)" checked /><label for="show-texture"> Show Texture</label></div>
+<div class="control"><span id="shininess-label">Shininess:</span><span class="value" id="shininess-value">1</span><input id="shininess-exp" type="range" min="0" max="100" value="50" oninput="SetShininess(this)" ondblclick="this.value=50;this.oninput()"/></div>
+<div class="control">OBJ model:<br/><input id="obj" type="file" onchange="LoadObj(this)" accept=".obj"/></div>
+<div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
+<div class="control"><img id="texture-img" /></div>
+</div>
+</div>
+</div>
+</body>
     </html>

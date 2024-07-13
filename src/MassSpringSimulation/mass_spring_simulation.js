@@ -9,8 +9,8 @@ class MassSpring {
 		this.label = label;
 		this.random = random;
 
-		this.gravity = new Vec3(0, 0, -20.0);
-		this.mass = .1;
+		this.gravity = new Vec3(0, 0, -9.0);
+		this.mass = 1;
 		this.stiffness = 1;
 		this.damping = 1;
 		this.restitution = .1;
@@ -72,7 +72,6 @@ class MassSpring {
 		for (var i = 0; i < this.nrm.length; ++i) this.nrm[i] = ToVec3(this.mesh.norm[i]);
 		this.buffers = this.mesh.getVertexBuffers();
 		this.meshDrawer.setMesh(this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer);
-
 		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
 
 	}
@@ -191,6 +190,7 @@ class MassSpring {
 					console.log("NET SOUND")
 					net_audio.play(); // Play the audio
 					isPlayingNet = true; // Control flag
+						
 				}
 				bounce = true
 
@@ -212,6 +212,11 @@ class MassSpring {
 				}
 
 			}
+			this.nrm = Array(this.mesh.norm.length);
+			for (var i = 0; i < this.nrm.length; ++i) this.nrm[i] = ToVec3(this.mesh.norm[i]);
+			this.buffers = this.mesh.getVertexBuffers();
+			this.meshDrawer.setMesh(this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer);
+			
 
 
 		}

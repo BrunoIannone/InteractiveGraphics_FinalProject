@@ -20,12 +20,11 @@ function ComputeSpringDampingForce(pi, pj, d, velocities, damping) {
 // Its job is to advance the simulation for the given time step duration dt.
 // It updates the given positions and velocities.
 function SimTimeStep(dt, positions, velocities, springs, stiffness, damping, particleMass, gravity, restitution, mesh) {
-
     var forces = Array(positions.length).fill(0); // The total for per particle
-
     //Gravity force computation for each particle
     for (var i = 0; i < positions.length; i++) {
         forces[i] = gravity.mul(particleMass);
+
     }
 
     //Compute spring forces

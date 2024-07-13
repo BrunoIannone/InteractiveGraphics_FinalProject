@@ -1,11 +1,11 @@
-//var lightView;
+///var lightView;
 
 class LightView
 {
-	constructor(drawa)
+	constructor()
 	{
-		this.drawa = drawa;
 		this.canvas = document.getElementById("lightcontrol");
+		console.log(this.canvas)
 		this.canvas.oncontextmenu = function() {return false;};
 		this.gl = this.canvas.getContext("webgl", {antialias: false, depth: true});	// Initialize the GL context
 		if (!this.gl) {
@@ -15,7 +15,7 @@ class LightView
 		
 		// Initialize settings
 		this.gl.clearColor(0.33,0.33,0.33,0);
-		this.gl.enable(gl.DEPTH_TEST);
+		this.gl.enable(this.gl.DEPTH_TEST);
 		
 		this.rotX = 0;
 		this.rotY = 0;
@@ -83,11 +83,10 @@ class LightView
 		this.canvas.style.width  = width  + 'px';
 		this.canvas.style.height = height + 'px';
 		this.gl.viewport( 0, 0, this.canvas.width, this.canvas.height );
-		this.proj = ProjectionMatrix( this.canvas, this.posZ, 30 );
+		this.proj = this.ProjectionMatrix( this.canvas, this.posZ, 30 );
 		
 		// Compile the shader program
-		this.prog = InitShaderProgram( lightViewVS, lightViewFS, this.gl );
-		console.log(["LIGHT",this.prog]);
+		this.prog = InitShaderProgramm( lightViewVS, lightViewFSs, this.gl );
 		this.mvp = this.gl.getUniformLocation( this.prog, 'mvp' );
 		this.clr1 = this.gl.getUniformLocation( this.prog, 'clr1' );
 		this.clr2 = this.gl.getUniformLocation( this.prog, 'clr2' );
@@ -96,23 +95,21 @@ class LightView
 		this.draw();
 		this.updateLightDir();
 		
-		this.canvas.onmousedown = (event) => {
+		this.canvas.onmousedown = function() {
 			var cx = event.clientX;
 			var cy = event.clientY;
-			this.canvas.onmousemove = (event) => {
-				this.rotY += (cx - event.clientX) / this.canvas.width * 5;
-				this.rotX += (cy - event.clientY) / this.canvas.height * 5;
+			lightView.canvas.onmousemove = function() {
+				lightView.rotY += (cx - event.clientX)/lightView.canvas.width*5;
+				lightView.rotX += (cy - event.clientY)/lightView.canvas.height*5;
 				cx = event.clientX;
 				cy = event.clientY;
-				this.draw();
-				this.updateLightDir();
+				lightView.draw();
+				lightView.updateLightDir();
 			}
-		};
-		
-		this.canvas.onmouseup = this.canvas.onmouseleave = () => {
-			this.canvas.onmousemove = null;
-		};
-		
+		}
+		this.canvas.onmouseup = this.canvas.onmouseleave = function() {
+			lightView.canvas.onmousemove = null;
+		}
 	}
 	
 	updateLightDir()
@@ -121,15 +118,15 @@ class LightView
 		var sy = Math.sin( this.rotY );
 		var cx = Math.cos( this.rotX );
 		var sx = Math.sin( this.rotX );
-		//console.log(sx);
-		for(var i=0; i< this.drawa.length; i++){
-			this.drawa[i].setLightDir( -sy, cy*sx, -cy*cx );
-			DrawScene();
+		massSpring.meshDrawer.setLightDir_old( -sy, cy*sx, cy*cx );
+		table.meshDrawer.setLightDir_old( -sy, cy*sx,cy*cx, );
 
-		}
+		circle.meshDrawer.setLightDir_old( -sy, cy*sx,cy*cx );
+
+		DrawScene();
 	}
 	
-	draw()//disegna icona light direction
+	draw()
 	{
 		// Clear the screen and the depth buffer.
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
@@ -139,14 +136,14 @@ class LightView
 		this.gl.enableVertexAttribArray( this.buffer );
 
 		this.gl.useProgram( this.prog );
-		var mvp = MatrixMult( this.proj, [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,this.posZ,1 ] );
+		var mvp = this.MatrixMult( this.proj, [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,this.posZ,1 ] );
 		this.gl.uniformMatrix4fv( this.mvp, false, mvp );
 		this.gl.uniform3f( this.clr1, 0.6,0.6,0.6 );
 		this.gl.uniform3f( this.clr2, 0,0,0 );
 		this.gl.drawArrays( this.gl.TRIANGLE_STRIP, 0, this.resCircle*2+2 );
 
-		var mv  = GetModelViewMatrix( 0, 0, this.posZ, this.rotX, this.rotY );
-		var mvp = MatrixMult( this.proj, mv );
+		var mv  = this.GetModelViewMatrix( 0, 0, this.posZ, this.rotX, this.rotY );
+		var mvp = this.MatrixMult( this.proj, mv );
 		this.gl.uniformMatrix4fv( this.mvp, false, mvp );
 		this.gl.uniform3f( this.clr1, 1,1,1 );
 		this.gl.drawArrays( this.gl.TRIANGLE_STRIP, 0, this.resCircle*2+2 );
@@ -156,6 +153,83 @@ class LightView
 		this.gl.drawArrays( this.gl.TRIANGLE_STRIP, this.resCircle*4+4, this.resArrow*2+2 );
 		this.gl.drawArrays( this.gl.TRIANGLE_FAN, this.resCircle*4+4 + this.resArrow*2+2, this.resArrow+2 );
 	}
+	ProjectionMatrix( c, z, fov_angle=60 )
+{
+	var r = c.width / c.height;
+	var n = (z - 1.74);
+	const min_n = 0.001;
+	if ( n < min_n ) n = min_n;
+	var f = (z + 1.74);;
+	var fov = 3.145 * fov_angle / 180;
+	var s = 1 / Math.tan( fov/2 );
+	return [
+		s/r, 0, 0, 0,
+		0, s, 0, 0,
+		0, 0, (n+f)/(f-n), 1,
+		0, 0, -2*n*f/(f-n), 0
+	];
+}
+MatrixMult( A, B )
+{
+	var C = Array(16);
+	for ( var i=0, m=0; i<4; ++i ) {
+		for ( var j=0; j<4; ++j, ++m ) {
+			var v = 0;
+			for ( var k=0; k<4; ++k ) {
+				v += A[j+4*k] * B[k+4*i];
+			}
+			C[m] = v;
+		}
+	}
+	return C;
+}
+GetModelViewMatrix( translationX, translationY, translationZ, rotationX, rotationY )
+{
+	// [TO-DO] Modify the code below to form the transformation matrix.
+	var R_x = [1, 0, 0, 0, 0, Math.cos(rotationX), Math.sin(rotationX), 0, 0, -Math.sin(rotationX), Math.cos(rotationX), 0, 0, 0, 0, 1];
+	var R_y = [Math.cos(rotationY), 0, -Math.sin(rotationY), 0, 0, 1, 0, 0, Math.sin(rotationY), 0, Math.cos(rotationY), 0, 0, 0, 0, 1];
+	var trans = [
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		translationX, translationY, translationZ, 1
+	];
+
+	var mvp = this.MatrixMult(this.MatrixMult(trans, R_y), R_x);
+
+	return mvp;
+
+}
+}
+function InitShaderProgramm( vsSource, fsSource, wgl )
+{
+	const vs = CompileShaderr( wgl.VERTEX_SHADER,   vsSource, wgl );
+	const fs = CompileShaderr( wgl.FRAGMENT_SHADER, fsSource, wgl );
+
+	const prog = wgl.createProgram();
+	wgl.attachShader(prog, vs);
+	wgl.attachShader(prog, fs);
+	wgl.linkProgram(prog);
+
+	if (!wgl.getProgramParameter(prog, wgl.LINK_STATUS)) {
+		alert('Unable to initialize the shader program: ' + wgl.getProgramInfoLog(prog));
+		return null;
+	}
+	return prog;
+}
+
+// This is a helper function for compiling a shader, called by InitShaderProgram().
+function CompileShaderr( type, source, wgl )
+{
+	const shader = wgl.createShader(type);
+	wgl.shaderSource(shader, source);
+	wgl.compileShader(shader);
+	if (!wgl.getShaderParameter( shader, wgl.COMPILE_STATUS) ) {
+		alert('An error occurred compiling shader:\n' + wgl.getShaderInfoLog(shader));
+		wgl.deleteShader(shader);
+		return null;
+	}
+	return shader;
 }
 
 // Vertex shader source code
@@ -168,7 +242,7 @@ const lightViewVS = `
 	}
 `;
 // Fragment shader source code
-var lightViewFS = `
+var lightViewFSs = `
 	precision mediump float;
 	uniform vec3 clr1;
 	uniform vec3 clr2;
@@ -177,4 +251,4 @@ var lightViewFS = `
 		gl_FragColor = gl_FrontFacing ? vec4(clr1,1) : vec4(clr2,1);
 	}
 `;
-///////////////////////////////////////////////////////////////////////////////////
+            
