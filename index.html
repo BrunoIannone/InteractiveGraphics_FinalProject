@@ -171,17 +171,16 @@
                 if (document.getElementById('raster').checked) {
 
                     if (massSpring) {
-                        //massSpring.boundingBox.draw(mvp);
                         massSpring.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         massSpring.pointDrawer.draw(mvp);
                     }
                     if (circle) {
-                        //circle.boundingBox.draw(mvp);
+                        
                         circle.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         circle.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
                     if (table) {
-                        //table.boundingBox.draw(mvp);
+                        
                         table.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         table.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
@@ -191,6 +190,13 @@
                     }
                     if(lightView){
                         lightView.draw()
+                    }
+                    if(document.getElementById("show-bbox").checked){
+                        circle.boundingBox.draw(mvp);
+                        table.boundingBox.draw(mvp);
+                        massSpring.boundingBox.draw(mvp);
+
+
                     }
                 }
 
@@ -455,8 +461,8 @@
 </div>
 <div class="control-group">
 <div class="control"><input id="show-box" name="show-box" type="checkbox" onchange="DrawScene()" checked /><label for="show-box"> Show Box</label></div>
+<div class="control"><input id="show-bbox" name="show-bbox" type="checkbox" onchange="DrawScene()" /><label for="show-bbox"> Show BBox</label></div>
 <div class="control"><input id="show-texture" name="show-texture" type="checkbox" onchange="ShowTexture(this)" checked /><label for="show-texture"> Show Texture</label></div>
-<div class="control"><span id="shininess-label">Shininess:</span><span class="value" id="shininess-value">1</span><input id="shininess-exp" type="range" min="0" max="100" value="50" oninput="SetShininess(this)" ondblclick="this.value=50;this.oninput()"/></div>
 <div class="control">OBJ model:<br/><input id="obj" type="file" onchange="LoadObj(this)" accept=".obj"/></div>
 <div class="control">Texture image:<br/><input id="texture" type="file" onchange="LoadTexture(this)" accept="image/*"/></div>
 <div class="control"><img id="texture-img" /></div>
