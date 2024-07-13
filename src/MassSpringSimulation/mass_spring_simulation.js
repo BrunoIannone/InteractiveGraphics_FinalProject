@@ -190,8 +190,10 @@ class MassSpring {
 					console.log("NET SOUND")
 					net_audio.play(); // Play the audio
 					isPlayingNet = true; // Control flag
+					this.updateScore('player1',2);
 						
 				}
+				
 				bounce = true
 
 			}
@@ -212,16 +214,18 @@ class MassSpring {
 				}
 
 			}
-			this.nrm = Array(this.mesh.norm.length);
-			for (var i = 0; i < this.nrm.length; ++i) this.nrm[i] = ToVec3(this.mesh.norm[i]);
-			this.buffers = this.mesh.getVertexBuffers();
-			this.meshDrawer.setMesh(this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer);
 			
-
 
 		}
 
 		this.updateMesh();
+
+	}
+	updateScore(player, score) {
+		let scoreElement = document.getElementById(player + '-score');
+		let currentScore = parseInt(scoreElement.innerText, 10);
+		let newScore = currentScore + score;
+		scoreElement.innerText = newScore;
 
 	}
 	checkCollision(bbox1, bbox2, x_offset, y_offset, z_offset) {

@@ -21,9 +21,9 @@ input[type=button] {
 #canvas {
 	display: block;
 	position: absolute;
-	top:  0;
+	top: 0;
 	left: 0;
-	width:  100%;
+	width: 100%;
 	height: 100%;
 }
 #canvas-div {
@@ -51,7 +51,7 @@ input[type=button] {
 	display: none;
 }
 #lightcontrol {
-	width:  12em;
+	width: 12em;
 	height: 12em;
 	background-color: black;
 	outline: 1px solid white;
@@ -74,12 +74,12 @@ input[type=button] {
 @media (orientation: landscape) {
 	#canvas-div {
 		display: inline-block;
-		width:  calc(100% - 14em);
+		width: calc(100% - 14em);
 		height: 100%;
 	}
 	#controls-div {
 		display: inline-block;
-		width:   14em;
+		width: 14em;
 		height: 100%;
 	}
 	.control-group {
@@ -95,11 +95,11 @@ input[type=button] {
 }
 @media (orientation: portrait) {
 	#canvas-div {
-		width:  100%;
+		width: 100%;
 		height: calc(100% - 20em);
 	}
 	#controls-div {
-		width:  100%;
+		width: 100%;
 		height: 20em;
 	}
 	.control-group {
@@ -113,4 +113,20 @@ input[type=button] {
 		width: auto;
 		height: 5em;
 	}
+}
+#score-table {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 10px;
+	color: white;
+	z-index: 10;
+}
+#score-table table {
+	width: 100%;
+}
+#score-table th, #score-table td {
+	padding: 5px;
+	text-align: left;
 }
