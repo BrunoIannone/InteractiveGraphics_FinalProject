@@ -142,7 +142,7 @@ class CircleMeshDrawer
 	}
 	
 	// This method is called to set the incoming light direction
-	setLightDir_old( x, y, z )
+	setLightDir( x, y, z )
 	{
 		gl.useProgram(this.prog);
 
@@ -154,20 +154,7 @@ class CircleMeshDrawer
 		//gl.uniform3f(swapped_lightdir_location, x, z, y);
 	
 	}
-	setLightDir( pos, intens )
-	{
-		gl.useProgram( this.prog );
-		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.position'  ), pos    );
-		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.intensity' ), intens );
-	}
 	
-	// This method is called to set the shininess of the material
-	setShininess( shininess )
-	{	
-		gl.useProgram(this.prog);
-		var shininess_location = gl.getUniformLocation(this.prog, 'shininess');
-		gl.uniform1f(shininess_location, shininess);
-	}
 }
 
 var CircleMeshVS = `

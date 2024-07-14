@@ -5,7 +5,6 @@ class LightView
 	constructor()
 	{
 		this.canvas = document.getElementById("lightcontrol");
-		console.log(this.canvas)
 		this.canvas.oncontextmenu = function() {return false;};
 		this.gl = this.canvas.getContext("webgl", {antialias: false, depth: true});	// Initialize the GL context
 		if (!this.gl) {
@@ -119,10 +118,8 @@ class LightView
 		var cx = Math.cos( this.rotX );
 		var sx = Math.sin( this.rotX );
 		//massSpring.meshDrawer.setLightDir_old( -sy, cy*sx, cy*cx );
-		table.meshDrawer.setLightDir_old( -sy, cy*sx,cy*cx, );
-
-		circle.meshDrawer.setLightDir_old( -sy, cy*sx,cy*cx );
-
+		table.meshDrawer.setLightDir( -sy, -cy*cx, cy*sx);
+		circle.meshDrawer.setLightDir( -sy, cy*sx,cy*cx );
 		DrawScene();
 	}
 	

@@ -39,8 +39,6 @@ class TableMeshDrawer
 		this.mtl_k_d = gl.getUniformLocation( this.prog, 'mtl.k_d' );
 		this.mtl_k_s = gl.getUniformLocation( this.prog, 'mtl.k_s' );
 		this.mtl_n   = gl.getUniformLocation( this.prog, 'mtl.n' );
-		this.center  = gl.getUniformLocation( this.prog, 'center' );
-		this.radius  = gl.getUniformLocation( this.prog, 'radius' );
 		this.campos  = gl.getUniformLocation( this.prog, 'campos' );
 
 		// Get the GPU memory position of the vertex position attribute from the VS code
@@ -66,8 +64,6 @@ class TableMeshDrawer
 		gl.uniform3fv( this.mtl_k_d, k_d );
 		gl.uniform3fv( this.mtl_k_s, k_s );
 		gl.uniform1f ( this.mtl_n,   n   );
-		gl.uniform3fv( this.center,  center  );
-		gl.uniform1f ( this.radius,  radius  );
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -154,7 +150,7 @@ class TableMeshDrawer
 	}
 	
 	// This method is called to set the incoming light direction
-	setLightDir_old( x, y, z )
+	setLightDir( x, y, z )
 	{
 		gl.useProgram(this.prog);
 
@@ -166,20 +162,7 @@ class TableMeshDrawer
 		//gl.uniform3f(swapped_lightdir_location, x, z, y);
 	
 	}
-	setLightDir( pos, intens )
-	{
-		gl.useProgram( this.prog );
-		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.position'  ), pos    );
-		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.intensity' ), intens );
-	}
 	
-	// This method is called to set the shininess of the material
-	setShininess( shininess )
-	{	
-		gl.useProgram(this.prog);
-		var shininess_location = gl.getUniformLocation(this.prog, 'shininess');
-		gl.uniform1f(shininess_location, shininess);
-	}
 }
 
 var TableMeshVS = `
