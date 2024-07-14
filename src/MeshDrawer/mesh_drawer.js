@@ -71,9 +71,7 @@ class MeshDrawer {
 	// elements in the normals array form a vertex normal.
 	// Note that this method can be called multiple times.
 	setMesh(vertPos, texCoords, normals) {
-		//console.log("IO",normals)
-		// [TO-DO] Update the contents of the vertex buffer objects.
-		// [TO-DO] Update the contents of the vertex buffer objects.
+		
 		this.vertPoslength = vertPos.length; // Storing this information is important for drawing step
 		gl.useProgram(this.prog);
 
@@ -92,7 +90,6 @@ class MeshDrawer {
 	// "Swap Y-Z Axes" checkbox. 
 	// The argument is a boolean that indicates if the checkbox is checked.
 	swapYZ(swap) {
-		// [TO-DO] Set the uniform parameter(s) of the vertex shader
 		gl.useProgram(this.prog);
 
 		//Assign swap VS variable the swap value
@@ -169,14 +166,10 @@ class MeshDrawer {
 
 	// This method is called to set the incoming light direction
 	setLightDir(x, y, z) {
+
 		gl.useProgram(this.prog);
-
 		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
-
-		gl.uniform3f(lightdir_location, x, y, z);
-		//var swapped_lightdir_location = gl.getUniformLocation(this.prog, 'swapped_lightdir'); //Used for handling light direction when swap is true
-
-		//gl.uniform3f(swapped_lightdir_location, x, z, y);
+		gl.uniform3f(lightdir_location, x, y, z);		
 
 	}
 	

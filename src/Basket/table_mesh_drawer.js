@@ -2,12 +2,11 @@
 // The two rotations are applied around x and y axes.
 // It returns the combined 4x4 transformation matrix as an array in column-major order.
 // You can use the MatrixMult function defined in project5.html to multiply two 4x4 matrices in the same format.
-function GetModelViewMatrix( translationX, translationY, translationZ, rotationX, rotationY )
-{
+function GetModelViewMatrix(translationX, translationY, translationZ, rotationX, rotationY) {
 	// [TO-DO] Modify the code below to form the transformation matrix.
 	var R_x = [1, 0, 0, 0, 0, Math.cos(rotationX), Math.sin(rotationX), 0, 0, -Math.sin(rotationX), Math.cos(rotationX), 0, 0, 0, 0, 1];
 	var R_y = [Math.cos(rotationY), 0, -Math.sin(rotationY), 0, 0, 1, 0, 0, Math.sin(rotationY), 0, Math.cos(rotationY), 0, 0, 0, 0, 1];
-	var R_z = [Math.cos(rotationY),Math.sin(rotationY),0,-Math.sin(rotationY),Math.cos(rotationY),0,0,0,1];
+	var R_z = [Math.cos(rotationY), Math.sin(rotationY), 0, -Math.sin(rotationY), Math.cos(rotationY), 0, 0, 0, 1];
 	var trans = [
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -21,32 +20,30 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 
 }
 
-class TableMeshDrawer
-{
+class TableMeshDrawer {
 
-	constructor()
-	{
-        
-        
-		
+	constructor() {
+
+
+
 		// Compile the shader program
 		this.prog = InitShaderProgram(TableMeshVS, TableMeshFS);
-		
+
 		// Get the ids of the uniform variables in the shaders. In this case, the transformation matrix named "mvp","mv","mn"
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 		this.mv = gl.getUniformLocation(this.prog, 'mv');
 		this.mn = gl.getUniformLocation(this.prog, 'mn');
-		this.mtl_k_d = gl.getUniformLocation( this.prog, 'mtl.k_d' );
-		this.mtl_k_s = gl.getUniformLocation( this.prog, 'mtl.k_s' );
-		this.mtl_n   = gl.getUniformLocation( this.prog, 'mtl.n' );
-		this.campos  = gl.getUniformLocation( this.prog, 'campos' );
+		this.mtl_k_d = gl.getUniformLocation(this.prog, 'mtl.k_d');
+		this.mtl_k_s = gl.getUniformLocation(this.prog, 'mtl.k_s');
+		this.mtl_n = gl.getUniformLocation(this.prog, 'mtl.n');
+		this.campos = gl.getUniformLocation(this.prog, 'campos');
 
 		// Get the GPU memory position of the vertex position attribute from the VS code
 		this.vertPosShader = gl.getAttribLocation(this.prog, 'vertex_pos');
 
 		// Get the GPU memory position of the texture position attribute from the VS code
 		this.texPosShader = gl.getAttribLocation(this.prog, 'texture_pos');
-		
+
 		// Get the GPU memory position of the normal position attribute from the VS code
 		this.normalsPosShader = gl.getAttribLocation(this.prog, 'normal_pos');
 
@@ -59,13 +56,13 @@ class TableMeshDrawer
 		// Length value of vertPos array
 		this.vertPoslength = 0;
 	}
-	setMaterial(k_d,k_s,n,center,radius){
-        gl.useProgram(this.prog);
-		gl.uniform3fv( this.mtl_k_d, k_d );
-		gl.uniform3fv( this.mtl_k_s, k_s );
-		gl.uniform1f ( this.mtl_n,   n   );
+	setMaterial(k_d, k_s, n) {
+		gl.useProgram(this.prog);
+		gl.uniform3fv(this.mtl_k_d, k_d);
+		gl.uniform3fv(this.mtl_k_s, k_s);
+		gl.uniform1f(this.mtl_n, n);
 	}
-	
+
 	// This method is called every time the user opens an OBJ file.
 	// The arguments of this function is an array of 3D vertex positions,
 	// an array of 2D texture coordinates, and an array of vertex normals.
@@ -77,9 +74,8 @@ class TableMeshDrawer
 	// form the texture coordinate of a vertex and every three consecutive 
 	// elements in the normals array form a vertex normal.
 	// Note that this method can be called multiple times.
-	setMesh( vertPos, texCoords, normals )
-	{
-		
+	setMesh(vertPos, texCoords, normals) {
+
 		this.vertPoslength = vertPos.length; // Storing this information is important for drawing step
 		gl.useProgram(this.prog);
 
@@ -91,25 +87,23 @@ class TableMeshDrawer
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-	
+
 	}
-	
+
 	// This method is called when the user changes the state of the
 	// "Swap Y-Z Axes" checkbox. 
 	// The argument is a boolean that indicates if the checkbox is checked.
-	swapYZ( swap )
-	{
+	swapYZ(swap) {
 		gl.useProgram(this.prog);
 
 		//Assign swap VS variable the swap value
 		var swap_location = gl.getUniformLocation(this.prog, 'swap');
 		gl.uniform1i(swap_location, swap);
 	}
-	setTrans( campos )
-	{
+	setTrans(campos) {
 		gl.useProgram(this.prog);
 
-		gl.uniform3fv( this.campos, campos );
+		gl.uniform3fv(this.campos, campos);
 	}
 
 	// This method is called to draw the triangular mesh.
@@ -117,15 +111,14 @@ class TableMeshDrawer
 	// the model-view transformation matrixMV, the same matrix returned
 	// by the GetModelViewProjection function above, and the normal
 	// transformation matrix, which is the inverse-transpose of matrixMV.
-	draw( matrixMVP, matrixMV, matrixNormal,campos )
-	{
+	draw(matrixMVP, matrixMV, matrixNormal, campos) {
 
 		gl.useProgram(this.prog);
 
 		gl.uniformMatrix4fv(this.mvp, false, matrixMVP); //Assign to mvp matrix, matrixMVP matrix (function input)
 		gl.uniformMatrix4fv(this.mv, false, matrixMV); //Assign to mv matrix, matrixMV matrix (function input)
-	    gl.uniformMatrix3fv(this.mn, false, matrixNormal); //Assign to mn matrix, matrixNormal matrix (function input)
-		gl.uniform3fv( this.campos, campos );
+		gl.uniformMatrix3fv(this.mn, false, matrixNormal); //Assign to mn matrix, matrixNormal matrix (function input)
+		gl.uniform3fv(this.campos, campos);
 
 		//Enable triangle drawing from vertPosShader and normalsPosShader array
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer); //Bind to the vertex buffer
@@ -136,22 +129,21 @@ class TableMeshDrawer
 		gl.vertexAttribPointer(this.normalsPosShader, 3, gl.FLOAT, false, 0, 0); //Assign the VS vertex_pos variable to the previous buffer
 		gl.enableVertexAttribArray(this.normalsPosShader); //Enable the array to be used as an attribute
 
-	
+
 		const textureSampler = gl.getUniformLocation(this.prog, "envMap");
 		gl.activeTexture(gl.TEXTURE0);
-		
+
 		gl.uniform1i(textureSampler, 0);
-	
-	
-	
+
+
+
 		//Drawing
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
-	
+
 	}
-	
+
 	// This method is called to set the incoming light direction
-	setLightDir( x, y, z )
-	{
+	setLightDir(x, y, z) {
 		gl.useProgram(this.prog);
 
 		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
@@ -160,9 +152,9 @@ class TableMeshDrawer
 		//var swapped_lightdir_location = gl.getUniformLocation(this.prog, 'swapped_lightdir'); //Used for handling light direction when swap is true
 
 		//gl.uniform3f(swapped_lightdir_location, x, z, y);
-	
+
 	}
-	
+
 }
 
 var TableMeshVS = `

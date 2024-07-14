@@ -73,7 +73,8 @@ class MassSpring {
 		this.buffers = this.mesh.getVertexBuffers();
 		this.meshDrawer.setMesh(this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer);
 		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
-
+		this.resetScore();
+		console.log("resetto")
 	}
 
 	updateMesh() {
@@ -157,7 +158,6 @@ class MassSpring {
 
 			handleSceneCollisions(this.pos, this.restitution, this.vel)
 			if (!isPlayingBounce && bounce) { // Play bounce audio
-				console.log("NET SOUND")
 				bounce_audio.play(); // Play the audio
 				isPlayingBounce = true; // Control flag
 				bounce = false
@@ -168,12 +168,9 @@ class MassSpring {
 		var table_position_buffer = table.buffers.positionBuffer
 		table_position_buffer = table.buffers.positionBuffer
 		var table_bbox = table.mesh.getBoundingBox();
-		//testbb = new BoundingBox(0,0,0); 
-		//testbb.setSwap(true)
-		//testbb.createBoundingBox(circle.mesh.getBoundingBox())
+		
 
 		if (this.checkCollision(mesh_bbox, table_bbox, 0, 0.42, 0.3)) { // Look for collisions with the table
-			//console.log("hit")
 			bounce = true;
 			handleObjectCollisions(this.pos, 0.1, this.vel, table_bbox, new Vec3(0, 0.42, 0.3));
 			collide = true;
@@ -181,19 +178,16 @@ class MassSpring {
 
 		var circle_bbox = circle.mesh.getBoundingBox();
 		if (this.checkCollision(mesh_bbox, circle_bbox, 0, 0, 0)) { //Look for collisions with the circle
-			console.log("circle hit")
 
 			if (isBoundingBoxCenterInside(mesh_bbox, circle_bbox, 0)) { //True if the ball bounding box center is inside the circle
-				console.log("circle inside")
 				collide = false;
 				if (!isPlayingNet) { //Play net sound
-					console.log("NET SOUND")
 					net_audio.play(); // Play the audio
 					isPlayingNet = true; // Control flag
-					this.updateScore('player1',2);
-						
+					this.updateScore(2);
+
 				}
-				
+
 				bounce = true
 
 			}
@@ -203,26 +197,30 @@ class MassSpring {
 					// Controlla se l'audio non è in riproduzione
 					if (!isPlayingMetal && !isPlayingNet) { //Play circle sound
 						//console.log("play")
-						console.log("METAL  SOUND")
 						metal_audio.play();  // Play the audio
 						isPlayingMetal = true; // Control flag
 						bounce = true
 					}
 
-
-
 				}
 
 			}
-			
+
 
 		}
 
 		this.updateMesh();
 
 	}
-	updateScore(player, score) {
-		let scoreElement = document.getElementById(player + '-score');
+	resetScore() {
+		let scoreElement = document.getElementById('player1' + '-score');
+		//let currentScore = parseInt(scoreElement.innerText, 10);
+		///let newScore = currentScore + score;
+		scoreElement.innerText = 0;
+
+	}
+	updateScore(score) {
+		let scoreElement = document.getElementById('player1' + '-score');
 		let currentScore = parseInt(scoreElement.innerText, 10);
 		let newScore = currentScore + score;
 		scoreElement.innerText = newScore;
@@ -265,7 +263,7 @@ class MassSpring {
 	isSimulationRunning() { return this.timer !== undefined; }
 
 	restartSimulation() { if (this.isSimulationRunning()) { this.stopSimulation(); this.startSimulation(); } }
-	
+
 	toggleSimulation(btn) {
 		if (this.isSimulationRunning()) {
 			this.stopSimulation();

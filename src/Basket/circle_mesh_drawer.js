@@ -35,8 +35,6 @@ class CircleMeshDrawer
 		this.mtl_k_d = gl.getUniformLocation( this.prog, 'mtl.k_d' );
 		this.mtl_k_s = gl.getUniformLocation( this.prog, 'mtl.k_s' );
 		this.mtl_n   = gl.getUniformLocation( this.prog, 'mtl.n' );
-		this.center  = gl.getUniformLocation( this.prog, 'center' );
-		this.radius  = gl.getUniformLocation( this.prog, 'radius' );
 		this.campos  = gl.getUniformLocation( this.prog, 'campos' );
 
 		// Get the GPU memory position of the vertex position attribute from the VS code
@@ -57,13 +55,12 @@ class CircleMeshDrawer
 		// Length value of vertPos array
 		this.vertPoslength = 0;
 	}
-	setMaterial(k_d,k_s,n,center,radius){
+	setMaterial(k_d,k_s,n){
         gl.useProgram(this.prog);
 		gl.uniform3fv( this.mtl_k_d, k_d );
 		gl.uniform3fv( this.mtl_k_s, k_s );
 		gl.uniform1f ( this.mtl_n,   n   );
-		gl.uniform3fv( this.center,  center  );
-		gl.uniform1f ( this.radius,  radius  );
+		
 	}
 	
 	// This method is called every time the user opens an OBJ file.

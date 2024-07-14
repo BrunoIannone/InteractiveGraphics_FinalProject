@@ -58,7 +58,6 @@ class Table {
 		this.buffers = this.mesh.getVertexBuffers();
 		this.meshDrawer.setMesh(this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer);
 		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
-		this.boundingBox.setTest(true)
 
 	}
 }

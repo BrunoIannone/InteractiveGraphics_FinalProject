@@ -3,7 +3,7 @@
 
     <head>
         <title>Basketball_reboot</title>
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+        <link rel="icon" type="image/x-icon" href="http://localhost:3000/favicon.ico">
 
         <link rel="stylesheet" href="src/Style/index.css">
 
@@ -68,11 +68,9 @@
             function initBasket() {
                 circle = new Circle();
                 circle.meshDrawer.setMaterial([1.0, 0.4, 0.0], [0.5, 0.5, 0.5], 100 )
-                //circle.meshDrawer.setLightDir_old(0, -1, 1)
 
                 table = new Table(0, 0.3, 0.42);
                 table.meshDrawer.setMaterial([0.4, 0.4, 0.4], [0.4, 0.4, 0.4], 100)
-                //table.meshDrawer.setLightDir_old(0,-1,1 )
 
                 // net = new Net();
                 // net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1.0,[ 0, 0, 0 ],1.0)
@@ -103,11 +101,7 @@
 
                 boxDrawer = new BoxDrawer()
                 massSpring = new MassSpring(false, "1");
-                //massSpring.meshDrawer.setLightDir_old(0, 0, 1)
-                //massSpring.meshDrawer.setLightDir([0,0,1000],[1,1,1])
-                //massSpring.meshDrawer.setMaterial([ 0.5, 0.5, 0.0 ],[ 0.8, 0.8, 0.8 ],100,[ 0, 0, 0 ],1.0)
                 massSpring.meshDrawer.showTexture(false);
-                //SetGravity(document.getElementById('gravity'));
                 SetMass(document.getElementById('mass'));
                 SetStiffness(document.getElementById('stiffness'));
 
@@ -185,9 +179,7 @@
                         table.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
                     //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
-                    if (testbb) {
-                        //testbb.draw(mvp);
-                    }
+                    
                     if(lightView){
                         lightView.draw()
                     }
