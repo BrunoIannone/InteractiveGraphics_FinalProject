@@ -71,7 +71,7 @@ class MeshDrawer {
 	// elements in the normals array form a vertex normal.
 	// Note that this method can be called multiple times.
 	setMesh(vertPos, texCoords, normals) {
-		
+
 		this.vertPoslength = vertPos.length; // Storing this information is important for drawing step
 		gl.useProgram(this.prog);
 
@@ -127,25 +127,24 @@ class MeshDrawer {
 	// This method is called to set the texture of the mesh.
 	// The argument is an HTML IMG element containing the texture data.
 	setTexture(img) {
-		// Usa il programma shader
 		gl.useProgram(this.prog);
 
-		// Creazione e binding della texture 2D
+		// 2D texture creation and binding
 		const texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 
-		// Imposta i parametri della texture 2D e carica l'immagine
+		// set 2D parameters
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
 		gl.generateMipmap(gl.TEXTURE_2D);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-		// Assegna i buffer delle coordinate texture
+		// assign buffer to texture coordinates
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.texbuffer);
 		gl.vertexAttribPointer(this.texPosShader, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.texPosShader);
 
-		// Passaggio della texture 2D all'unità di texture 0
+		// assign texture to unit 0
 		const textureSampler = gl.getUniformLocation(this.prog, "texture_sampler");
 		gl.activeTexture(gl.TEXTURE0);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -169,10 +168,10 @@ class MeshDrawer {
 
 		gl.useProgram(this.prog);
 		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
-		gl.uniform3f(lightdir_location, x, y, z);		
+		gl.uniform3f(lightdir_location, x, y, z);
 
 	}
-	
+
 }
 
 var MeshVS = `

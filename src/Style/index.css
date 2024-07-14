@@ -4,20 +4,26 @@ html {
 	font-family: Arial;
 	overflow: hidden;
 }
+
 body {
 	padding: 0;
 	margin: 0;
 }
-input[type=checkbox], label {
+
+input[type=checkbox],
+label {
 	cursor: hand;
 }
+
 input[type=range] {
 	width: 100%;
 }
+
 input[type=button] {
 	width: 100%;
 	min-width: 9em;
 }
+
 #canvas {
 	display: block;
 	position: absolute;
@@ -26,30 +32,38 @@ input[type=button] {
 	width: 100%;
 	height: 100%;
 }
+
 #canvas-div {
 	position: relative;
 }
+
 .sel {
 	cursor: hand;
 }
+
 #controls-div {
 	vertical-align: top;
 	background-color: #333;
 	overflow: auto;
 }
+
 #controls {
 	padding: 1em;
 }
+
 .control-group {
 	position: relative;
 	max-width: 12em;
 }
+
 .control {
 	padding: 0.2em;
 }
+
 .control-x {
 	display: none;
 }
+
 #lightcontrol {
 	width: 12em;
 	height: 12em;
@@ -57,63 +71,77 @@ input[type=button] {
 	outline: 1px solid white;
 	outline-offset: -1px;
 }
+
 #lightcontrol-label {
 	position: absolute;
 	top: 0.2em;
 	left: 0.2em;
 	pointer-events: none;
 }
+
 #shininess-label {
 	float: left;
 }
+
 .value {
 	float: right;
 	text-align: right;
 	width: 4em;
 }
+
 @media (orientation: landscape) {
 	#canvas-div {
 		display: inline-block;
 		width: calc(100% - 14em);
 		height: 100%;
 	}
+
 	#controls-div {
 		display: inline-block;
 		width: 14em;
 		height: 100%;
 	}
+
 	.control-group {
 		overflow: hidden;
 	}
-	.control-group ~ .control-group {
+
+	.control-group~.control-group {
 		margin-top: 1em;
 	}
+
 	#texture-img {
 		width: 100%;
 		height: auto;
 	}
 }
+
 @media (orientation: portrait) {
 	#canvas-div {
 		width: 100%;
 		height: calc(100% - 20em);
 	}
+
 	#controls-div {
 		width: 100%;
 		height: 20em;
 	}
+
 	.control-group {
 		display: inline-block;
 		vertical-align: top;
 	}
-	.control-group ~ .control-group {
+
+	.control-group~.control-group {
 		margin-left: 2em;
 	}
+
 	#texture-img {
 		width: auto;
 		height: 5em;
 	}
 }
+
 #score-table {
 	position: absolute;
 	top: 0;
@@ -123,10 +151,13 @@ input[type=button] {
 	color: white;
 	z-index: 10;
 }
+
 #score-table table {
 	width: 100%;
 }
-#score-table th, #score-table td {
+
+#score-table th,
+#score-table td {
 	padding: 5px;
 	text-align: left;
 }

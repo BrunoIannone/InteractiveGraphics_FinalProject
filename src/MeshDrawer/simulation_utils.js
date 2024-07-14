@@ -193,14 +193,14 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].x *= -restitution;
         }
 
-        if (positions[i].y > boundingBox.max[2] + translation.y) { 
+        if (positions[i].y > boundingBox.max[2] + translation.y) {
             y0 = boundingBox.max[2] + translation.y;
             h = positions[i].y - y0;
             positions[i].y = y0 - restitution * h;
             velocities[i].y *= -restitution;
         }
 
-        if (positions[i].z > boundingBox.max[1] + translation.z) { 
+        if (positions[i].z > boundingBox.max[1] + translation.z) {
             z0 = boundingBox.max[1] + translation.z;
             h = positions[i].z - z0;
             positions[i].z = z0 - restitution * h;

@@ -74,7 +74,6 @@ class MassSpring {
 		this.meshDrawer.setMesh(this.buffers.positionBuffer, this.buffers.texCoordBuffer, this.buffers.normalBuffer);
 		this.boundingBox.createBoundingBox(this.mesh.getBoundingBox());
 		this.resetScore();
-		console.log("resetto")
 	}
 
 	updateMesh() {
@@ -168,7 +167,7 @@ class MassSpring {
 		var table_position_buffer = table.buffers.positionBuffer
 		table_position_buffer = table.buffers.positionBuffer
 		var table_bbox = table.mesh.getBoundingBox();
-		
+
 
 		if (this.checkCollision(mesh_bbox, table_bbox, 0, 0.42, 0.3)) { // Look for collisions with the table
 			bounce = true;
