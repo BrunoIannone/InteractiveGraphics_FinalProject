@@ -65,9 +65,8 @@
                 table = new Table(0, 0.3, 0.42);
                 table.meshDrawer.setMaterial([0.4, 0.4, 0.4], [0.4, 0.4, 0.4], 100)
 
-                // net = new Net();
-                // net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1.0,[ 0, 0, 0 ],1.0)
-                // net.meshDrawer.setLightDir_old(0,-1,1)
+                net = new Net();
+                net.meshDrawer.setMaterial([ 1, 1, 1 ],[ 1,1, 1 ],1.0)
             }
             function InitWebGL() {
                 // Initialize the WebGL canvas
@@ -171,7 +170,7 @@
                         table.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         table.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
-                    //net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
                     
                     if(lightView){
                         lightView.draw()
@@ -180,7 +179,6 @@
                         circle.boundingBox.draw(mvp);
                         table.boundingBox.draw(mvp);
                         massSpring.boundingBox.draw(mvp);
-
 
                     }
                 }
@@ -222,8 +220,6 @@
                 }
                 return shader;
             }
-
-
 
         </script>
 

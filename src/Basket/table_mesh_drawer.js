@@ -207,9 +207,8 @@ uniform Material mtl;
 varying vec2 texCoord;
 varying vec3 normCoord;
 varying vec3 vertexPos;
-
-
 varying vec3 viewVector;
+
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl);
 // Blinn Shading function
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl){

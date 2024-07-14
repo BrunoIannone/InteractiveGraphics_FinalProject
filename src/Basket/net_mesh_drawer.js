@@ -21,21 +21,15 @@ function GetModelViewMatrix( translationX, translationY, translationZ, rotationX
 
 }
 
-
-// [TO-DO] Complete the implementation of the following class.
-
 class NetMeshDrawer
 {
-	// The constructor is a good place for taking care of the necessary initializations.
-	//commit
+	
 	constructor()
 	{
         
-        
-		// [TO-DO] initializations
 		// Compile the shader program
 		this.prog = InitShaderProgram(NetMeshVS, NetMeshFS);
-		//console.log(["MESH",this.prog]);
+		
 		// Get the ids of the uniform variables in the shaders. In this case, the transformation matrix named "mvp","mv","mn"
 		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 		this.mv = gl.getUniformLocation(this.prog, 'mv');
@@ -64,13 +58,12 @@ class NetMeshDrawer
 		// Length value of vertPos array
 		this.vertPoslength = 0;
 	}
-	setMaterial(k_d,k_s,n,center,radius){
+	setMaterial(k_d,k_s,n){
         gl.useProgram(this.prog);
 		gl.uniform3fv( this.mtl_k_d, k_d );
 		gl.uniform3fv( this.mtl_k_s, k_s );
 		gl.uniform1f ( this.mtl_n,   n   );
-		gl.uniform3fv( this.center,  center  );
-		gl.uniform1f ( this.radius,  radius  );
+		
 	}
 	
 	// This method is called every time the user opens an OBJ file.
@@ -103,19 +96,6 @@ class NetMeshDrawer
 	
 	}
 	
-	// This method is called when the user changes the state of the
-	// "Swap Y-Z Axes" checkbox. 
-	// The argument is a boolean that indicates if the checkbox is checked.
-	swapYZ( swap )
-	{
-		// [TO-DO] Set the uniform parameter(s) of the vertex shader
-		gl.useProgram(this.prog);
-
-		//Assign swap VS variable the swap value
-		var swap_location = gl.getUniformLocation(this.prog, 'swap');
-		gl.uniform1i(swap_location, swap);
-	}
-	
 	// This method is called to draw the triangular mesh.
 	// The arguments are the model-view-projection transformation matrixMVP,
 	// the model-view transformation matrixMV, the same matrix returned
@@ -145,22 +125,13 @@ class NetMeshDrawer
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertPoslength / 3); //Draw the vertices in the array in groups of three
 	}
 	
-	setLightDir( pos, intens )
-	{
-		gl.useProgram( this.prog );
-		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.position'  ), pos    );
-		gl.uniform3fv( gl.getUniformLocation( this.prog, 'light.intensity' ), intens );
-	}
-	
-	// This method is called to set the shininess of the material
-	setShininess( shininess )
-	{
-		// [TO-DO] set the uniform parameter(s) of the fragment shader to specify the shininess.
-	
+	setLightDir(x, y, z) {
+
 		gl.useProgram(this.prog);
-		var shininess_location = gl.getUniformLocation(this.prog, 'shininess');
-		gl.uniform1f(shininess_location, shininess);
+		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
+		gl.uniform3f(lightdir_location, x, z, y);
 	}
+	
 }
 
 var NetMeshVS = `
@@ -171,34 +142,27 @@ attribute vec2 texture_pos; //Texture positions
 attribute vec3 normal_pos; //Normals positions
 
 uniform vec3 lightdir; //Light direction
-//uniform vec3 swapped_lightdir; //Light direction when swap is true
 
 uniform mat4 mvp; //Model-view-projection tranformation matrix
 uniform mat4 mv; // Model-view transformation matrix
 uniform mat3 mn; // Inverse transpose model-view transformation matrix
 
-//uniform float shininess; //Shininess value
-//uniform bool swap; //If true, swap Y-Z axes
 
 varying vec2 texCoord;
 varying vec3 normCoord;
 varying vec4 viewVector;
+varying vec3 vertexPos;
 
 void main()
 {
-	/*if (swap){
-		gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y,1);
+	
+	gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y-0.36,1);
 		
-
-	}
-	else{*/
-		gl_Position = mvp * vec4(vertex_pos.x,vertex_pos.z,vertex_pos.y-0.36,1);
-		
-
-	//}
 	normCoord =  normal_pos;
 	viewVector = normalize(-(mv * vec4(vertex_pos,1)));
 	texCoord = texture_pos;
+	vertexPos = vertex_pos;
+
 
 }
 `;
@@ -206,26 +170,25 @@ void main()
 // Fragment shader source code for mesh
 var NetMeshFS = `
 precision mediump float;
-uniform sampler2D texture_sampler;
-uniform bool use_texture;
-uniform mat4 mvp;
-
-//uniform float shininess;
-uniform vec3 lightdir;
-//uniform vec3 swapped_lightdir;
-//uniform bool swap;
-
-varying vec2 texCoord;
-varying vec3 normCoord;
 struct Material {
     vec3  k_d;	// diffuse coefficient
     vec3  k_s;	// specular coefficient
     float n;	// specular exponent
 };
+
+uniform sampler2D texture_sampler;
+uniform bool use_texture;
+uniform mat4 mvp;
+uniform vec3 lightdir;
 uniform Material mtl;
 
 varying vec4 viewVector;
+varying vec2 texCoord;
+varying vec3 normCoord;
+varying vec3 vertexPos;
+
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl);
+
 // Blinn Shading function
 vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material mtl){
 
@@ -235,29 +198,13 @@ vec3 BlinnShader(vec3 light_dir,vec3 view,vec3 normal, vec3 intensity,Material m
 			vec3 c = intensity * (cos_theta * mtl.k_d + mtl.k_s * pow(cos_phi, mtl.n));
 			return c;
 }
+
 void main() {
-	vec3 lightdir_;
-	/*if(swap){
-		lightdir_ = swapped_lightdir;
-	}
-	else{*/
-		lightdir_ = lightdir;
-	//}
+
+	vec3 lightdir_ = lightdir - vertexPos;
 	vec3 intensity = vec3(1.0, 1.0, 1.0);
-	/*vec3 h = normalize(lightdir_ + vec3(viewVector.x, viewVector.y, viewVector.z));
-	float cos_theta = max(0.0, dot(lightdir_, normCoord));
-	float cos_phi = max(0.0, dot(normCoord, h));
-	if(use_texture) {
-		vec3 c = intensity * (cos_theta * vec3(texture2D(texture_sampler, texCoord)) + vec3(1.0, 1.0, 1.0) * pow(cos_phi, mtl.n));
-		gl_FragColor =vec4(1.0, 0, 1.0,1.0); //vec4(c, 1) + texture2D(texture_sampler, texCoord) * 0.2;
 
-	} else {
-		vec3 c = intensity * (cos_theta * mtl.k_d + mtl.k_s * pow(cos_phi, mtl.n));
-		gl_FragColor = vec4(c, 1);// + vec4(1.0, 1,0, 1.0) * 0.2;
-	}
-    //gl_FragColor = vec4(1.0, 0, 1.0,1.0);*/
 	gl_FragColor = vec4(BlinnShader( lightdir_,  vec3(viewVector.x, viewVector.y, viewVector.z), normCoord,  intensity, mtl),1);
-
 
 }
 `;

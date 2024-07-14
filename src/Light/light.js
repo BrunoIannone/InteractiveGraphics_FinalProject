@@ -1,5 +1,3 @@
-///var lightView;
-
 class LightView {
 	constructor() {
 		this.canvas = document.getElementById("lightcontrol");
@@ -117,6 +115,8 @@ class LightView {
 		//massSpring.meshDrawer.setLightDir_old( -sy, cy*sx, cy*cx );
 		table.meshDrawer.setLightDir(-sy, -cy * cx, cy * sx);
 		circle.meshDrawer.setLightDir(-sy, cy * sx, cy * cx);
+		net.meshDrawer.setLightDir(-sy, -cy * cx, cy * sx);
+
 		DrawScene();
 	}
 
@@ -175,7 +175,6 @@ class LightView {
 		return C;
 	}
 	GetModelViewMatrix(translationX, translationY, translationZ, rotationX, rotationY) {
-		// [TO-DO] Modify the code below to form the transformation matrix.
 		var R_x = [1, 0, 0, 0, 0, Math.cos(rotationX), Math.sin(rotationX), 0, 0, -Math.sin(rotationX), Math.cos(rotationX), 0, 0, 0, 0, 1];
 		var R_y = [Math.cos(rotationY), 0, -Math.sin(rotationY), 0, 0, 1, 0, 0, Math.sin(rotationY), 0, Math.cos(rotationY), 0, 0, 0, 0, 1];
 		var trans = [
