@@ -1,43 +1,39 @@
 class PointDrawer {
-	constructor()
-	{
+	constructor() {
 		// Compile the shader program
-		this.prog = InitShaderProgram( pointVS, pointFS );
-		
+		this.prog = InitShaderProgram(pointVS, pointFS);
+
 		// Get the ids of the uniform variables in the shaders
-		this.mvp = gl.getUniformLocation( this.prog, 'mvp' );
+		this.mvp = gl.getUniformLocation(this.prog, 'mvp');
 
 		// Get the ids of the vertex attributes in the shaders
-		this.vertPos = gl.getAttribLocation( this.prog, 'pos' );
-		
+		this.vertPos = gl.getAttribLocation(this.prog, 'pos');
+
 		// Create the buffer objects
 		this.vertbuffer = gl.createBuffer();
 	}
-	setPoint(p)
-	{
-		if ( this.selVertex == p ) return false;
+	setPoint(p) {
+		if (this.selVertex == p) return false;
 		this.selVertex = p;
 		this.updatePoint();
 		return true;
 	}
-	updatePoint()
-	{
-		if ( this.selVertex !== undefined ) {
-			var pos = [ this.selVertex.x, this.selVertex.y, this.selVertex.z ];
+	updatePoint() {
+		if (this.selVertex !== undefined) {
+			var pos = [this.selVertex.x, this.selVertex.y, this.selVertex.z];
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pos), gl.STATIC_DRAW);
 		}
 	}
-	draw( trans )
-	{
-		if ( this.selVertex ) {
-			gl.useProgram( this.prog );
-			gl.uniformMatrix4fv( this.mvp, false, trans );
-			gl.bindBuffer( gl.ARRAY_BUFFER, this.vertbuffer );
-			gl.vertexAttribPointer( this.vertPos, 3, gl.FLOAT, false, 0, 0 );
-			gl.enableVertexAttribArray( this.vertPos );
+	draw(trans) {
+		if (this.selVertex) {
+			gl.useProgram(this.prog);
+			gl.uniformMatrix4fv(this.mvp, false, trans);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertbuffer);
+			gl.vertexAttribPointer(this.vertPos, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(this.vertPos);
 			gl.disable(gl.DEPTH_TEST);
-			gl.drawArrays( gl.POINTS, 0, 1 );
+			gl.drawArrays(gl.POINTS, 0, 1);
 			gl.enable(gl.DEPTH_TEST);
 		}
 	}

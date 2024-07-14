@@ -53,7 +53,7 @@ class MeshDrawer {
 		this.vertPoslength = 0;
 	}
 
-	setMaterial(k_d, k_s, n, center, radius) {
+	setMaterial(k_d, k_s, n) {
 		gl.uniform3fv(this.mtl_k_d, k_d);
 		gl.uniform3fv(this.mtl_k_s, k_s);
 		gl.uniform1f(this.mtl_n, n);

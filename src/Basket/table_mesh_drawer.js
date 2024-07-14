@@ -144,15 +144,10 @@ class TableMeshDrawer {
 
 	// This method is called to set the incoming light direction
 	setLightDir(x, y, z) {
+
 		gl.useProgram(this.prog);
-
 		var lightdir_location = gl.getUniformLocation(this.prog, 'lightdir');
-
 		gl.uniform3f(lightdir_location, x, z, y);
-		//var swapped_lightdir_location = gl.getUniformLocation(this.prog, 'swapped_lightdir'); //Used for handling light direction when swap is true
-
-		//gl.uniform3f(swapped_lightdir_location, x, z, y);
-
 	}
 
 }

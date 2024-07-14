@@ -35,17 +35,10 @@
             const transZmax = 10;
             var canvas, gl, background, perspectiveMatrix;
             var circle, table, net;
-            var primaryRT, secondaryRT;
             var boxDrawer, showBox, arena_size = 3;
             var massSpring, lightView, testbb, collide = true;
             var metal_audio, isPlayingMetal = false, net_audio, isPlayingNet = false, bounce_audio, isPlayingBounce = false, bounce = true;
-            var lights = [
-                {
-                    position: [0, 0, 1000],
-                    intensity: [1, 1, 1]
-                }
-
-            ];
+            
         </script>
         <!-- --------- -->
         
@@ -53,15 +46,15 @@
             function initSound() {
                 metal_audio = new Audio('assets/metal.mp3');
                 metal_audio.addEventListener('ended', function () {
-                    isPlayingMetal = false; // Reset del flag quando l'audio termina
+                    isPlayingMetal = false; // flag resets when audio terminates
                 });
                 net_audio = new Audio('assets/net.mp3');
                 net_audio.addEventListener('ended', function () {
-                    isPlayingNet = false; // Reset del flag quando l'audio termina
+                    isPlayingNet = false; // flag resets when audio terminates
                 });
                 bounce_audio = new Audio('assets/bounce.mp3');
                 bounce_audio.addEventListener('ended', function () {
-                    isPlayingBounce = false; // Reset del flag quando l'audio termina
+                    isPlayingBounce = false; // flag resets when audio terminates
                 });
 
             }
@@ -342,21 +335,7 @@
 
                 }
             }
-
-
-            function ShowControls() {
-                var c = document.getElementById('controls');
-                c.style.display = c.style.display == 'none' ? '' : 'none';
-            }
-            function SetGravity( param )
-            {
-                var v = param.value;
-                var s = v / 20;
-                document.getElementById('gravity-value').innerText = s.toFixed( 2 );
-                massSpring.gravity.z = -s;
-            }
-
-
+            
             function SetMass(param) {
                 var v = param.value;
                 var s = v / 200;
@@ -378,12 +357,6 @@
                 massSpring.damping = s;
             }
 
-            function SetShininess(param) {
-                var exp = param.value;
-                var s = Math.pow(10, exp / 25);
-                document.getElementById('shininess-value').innerText = s.toFixed(s < 10 ? 2 : 0);
-                meshDrawer.setShininess(s);
-            }
             function SetTimeStepSize(param) {
                 var s = param.value;
                 document.getElementById('timestep-value').innerText = s + " ms";
@@ -446,7 +419,6 @@
 <div class="control"><input type="button" value="Start Simulation" onclick="massSpring.toggleSimulation(this)"></div>
 <div class="control"><input type="button" value="Reset" onclick="massSpring.reset();DrawScene()"></div>
 <div class="control"><span id="timestep-label">Time Step Size:</span><span class="value" id="timestep-value">20 ms</span><input id="timestep" type="range" min="1" max="100" value="20" oninput="SetTimeStepSize(this)" onchange="massSpring.restartSimulation()" ondblclick="this.value=20;this.oninput();this.onchange()"/></div>
-<div class="control"><span id="gravity-label">Gravity:</span><span class="value" id="gravity-value">1</span><input id="gravity" type="range" min="0" max="100" value="20" oninput="SetGravity(this)" ondblclick="this.value=20;this.oninput()"/></div>
 <div class="control"><span id="mass-label">Mass:</span><span class="value" id="mass-value">1</span><input id="mass" type="range" min="1" max="100" value="20" oninput="SetMass(this)" ondblclick="this.value=20;this.oninput()"/></div>
 <div class="control"><span id="stiffness-label">Stiffness:</span><span class="value" id="stiffness-value">1</span><input id="stiffness" type="range" min="0" max="100" value="20" oninput="SetStiffness(this)" ondblclick="this.value=20;this.oninput()"/></div>
 <div class="control"><span id="damping-label">Damping:</span><span class="value" id="damping-value">1.00</span><input id="damping" type="range" min="0" max="100" value="20" oninput="SetDamping(this)" ondblclick="this.value=20;this.oninput()"/></div>

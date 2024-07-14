@@ -54,7 +54,7 @@ function SimTimeStep(dt, positions, velocities, springs, stiffness, damping, par
 }
 
 function areBoundingBoxesColliding(bbox1, bbox2) {
-    return !(bbox1.max[0] <= bbox2.min[0] || // bbox1 è a sinistra di bbox2
+    return !(bbox1.max[0] <= bbox2.min[0] || // bbox1 left w.r.t di bbox2
         bbox1.min[0] >= bbox2.max[0] || // bbox1 right w.r.t bbox2
         bbox1.max[1] <= bbox2.min[1] || // bbox1 under bbox2
         bbox1.min[1] >= bbox2.max[1] || // bbox1 over bbox2
@@ -74,31 +74,29 @@ function isBoundingBoxInside(bbox1, bbox2, threshold = 0) {
 function isBoundingBoxHigherThan(zValue, bbox) {
     const boundingBox = bbox;
     if (boundingBox === null) {
-        return false; // or handle this case as needed
+        return false; 
     }
     return boundingBox.max[2] > zValue;
 }
 function isBoundingBoxInsideSwapped(bbox1, bbox2, threshold = 0) {
-    // Aggiungi la threshold ai limiti della seconda bounding box
     let minThreshold = bbox2.min.map((val) => val - threshold);
     let maxThreshold = bbox2.max.map((val) => val + threshold);
 
-    return (bbox1.min[0] >= minThreshold[0] && bbox1.max[0] <= maxThreshold[0] && // bbox1 è dentro bbox2 lungo l'asse x
-        bbox1.min[1] >= minThreshold[1] && bbox1.max[1] <= maxThreshold[1] && // bbox1 è dentro bbox2 lungo l'asse y
-        bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 è dentro bbox2 lungo l'asse z
+    return (bbox1.min[0] >= minThreshold[0] && bbox1.max[0] <= maxThreshold[0] && // bbox1 is inside bbox2 along x-axis
+        bbox1.min[1] >= minThreshold[1] && bbox1.max[1] <= maxThreshold[1] && // bbox1 is inside bbox2 along y-axis
+        bbox1.min[2] >= minThreshold[2] && bbox1.max[2] <= maxThreshold[2]);  // bbox1 is inside bbox2 along z-axis
 }
 function isBoundingBoxCenterInside(bbox1, bbox2, threshold = 0) {
-    // Calcola il centro di bbox1
+    // compute bbox1 center
     let center = bbox1.min.map((val, idx) => (val + bbox1.max[idx]) / 2);
 
-    // Aggiungi la threshold ai limiti della seconda bounding box
     let minThreshold = bbox2.min.map((val) => val - threshold);
     let maxThreshold = bbox2.max.map((val) => val + threshold);
 
-    // Verifica se il centro di bbox1 è dentro bbox2
-    return (center[0] >= minThreshold[0] && center[0] <= maxThreshold[0] && // il centro è dentro bbox2 lungo l'asse x
-        center[1] >= minThreshold[1] && center[1] <= maxThreshold[1] && // il centro è dentro bbox2 lungo l'asse y
-        center[2] >= minThreshold[2] && center[2] <= maxThreshold[2]);  // il centro è dentro bbox2 lungo l'asse z
+    // check if bbox1 center is inside bbox2
+    return (center[0] >= minThreshold[0] && center[0] <= maxThreshold[0] && // Center is inside bbox2 along x-axis
+        center[1] >= minThreshold[1] && center[1] <= maxThreshold[1] && // Center is inside bbox2 along y-axis
+        center[2] >= minThreshold[2] && center[2] <= maxThreshold[2]);  // Center is inside bbox2 along z-axis
 }
 
 function handleSceneCollisions(positions, restitution, velocities) {
@@ -107,13 +105,6 @@ function handleSceneCollisions(positions, restitution, velocities) {
     for (var i = 0; i < positions.length; i++) {
 
         if (positions[i].x < -arena_size) {
-
-            /*let scoreElement = document.getElementById("score");
-            let scoreText = scoreElement.innerText;
-            let score = scoreText.split(":");
-            score[arena_size] = parseInt(score[arena_size]) + arena_size;
-            scoreElement.innerText = score[0] + ": " + score[arena_size];*/
-
 
             x0 = -arena_size;
             h = x0 - positions[i].x;
@@ -163,7 +154,7 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
     var x0, y0, z0, h;
 
     for (var i = 0; i < positions.length; i++) {
-        // Controllo collisione con la parte minima della bounding box
+        // Check bounding box minimum side 
         /*if (positions[i].x < boundingBox.min[0] + translation.x) {
             x0 = boundingBox.min[0] + translation.x;
             h = x0 - positions[i].x;
@@ -185,7 +176,7 @@ function handleObjectCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].z *= -restitution;
         }*/
 
-        // Controllo collisione con la parte massima della bounding box
+        // Check bounding box maximum side
         if (positions[i].x > boundingBox.max[0] + translation.x) {
             x0 = boundingBox.max[0] + translation.x;
             h = positions[i].x - x0;
@@ -214,7 +205,7 @@ function handleCircleCollisions(positions, restitution, velocities, boundingBox,
     var x0, y0, z0, h;
 
     for (var i = 0; i < positions.length; i++) {
-        // Controllo collisione con la parte minima della bounding box
+        // Check bounding box minimum side bounding box
         if (positions[i].x < boundingBox.min[0] + translation.x) {
             x0 = boundingBox.min[0] + translation.x;
             h = x0 - positions[i].x;
@@ -222,21 +213,21 @@ function handleCircleCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].x *= -restitution;
         }
 
-        if (positions[i].y < boundingBox.min[2] + translation.y) { // Scambio z <-> y corretto
+        if (positions[i].y < boundingBox.min[2] + translation.y) { 
             y0 = boundingBox.min[2] + translation.y;
             h = y0 - positions[i].y;
             positions[i].y = restitution * h + y0;
             velocities[i].y *= -restitution;
         }
 
-        if (positions[i].z < boundingBox.min[1] + translation.z) { // Scambio y <-> z corretto
+        if (positions[i].z < boundingBox.min[1] + translation.z) { 
             z0 = boundingBox.min[1] + translation.z;
             h = z0 - positions[i].z;
             positions[i].z = restitution * h + z0;
             velocities[i].z *= -restitution;
         }
 
-        // Controllo collisione con la parte massima della bounding box
+        // Check bounding box maximum side bounding box
         /*if (positions[i].x > boundingBox.max[0] + translation.x) {
             x0 = boundingBox.max[0] + translation.x;
             h = positions[i].x - x0;
@@ -244,14 +235,14 @@ function handleCircleCollisions(positions, restitution, velocities, boundingBox,
             velocities[i].x *= -restitution;
         }
 
-        if (positions[i].y > boundingBox.max[2] + translation.y) { // Scambio z <-> y corretto
+        if (positions[i].y > boundingBox.max[2] + translation.y) { 
             y0 = boundingBox.max[2] + translation.y;
             h = positions[i].y - y0;
             positions[i].y = y0 - restitution * h;
             velocities[i].y *= -restitution;
         }
 
-        if (positions[i].z > boundingBox.max[1] + translation.z) { // Scambio y <-> z corretto
+        if (positions[i].z > boundingBox.max[1] + translation.z) { 
             z0 = boundingBox.max[1] + translation.z;
             h = positions[i].z - z0;
             positions[i].z = z0 - restitution * h;

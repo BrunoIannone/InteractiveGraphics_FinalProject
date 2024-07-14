@@ -3,7 +3,6 @@
 // It returns the combined 4x4 transformation matrix as an array in column-major order.
 // You can use the MatrixMult function defined in project5.html to multiply two 4x4 matrices in the same format.
 function GetModelViewMatrix(translationX, translationY, translationZ, rotationX, rotationY) {
-	// [TO-DO] Modify the code below to form the transformation matrix.
 	var R_x = [1, 0, 0, 0, 0, Math.cos(rotationX), Math.sin(rotationX), 0, 0, -Math.sin(rotationX), Math.cos(rotationX), 0, 0, 0, 0, 1];
 	var R_y = [Math.cos(rotationY), 0, -Math.sin(rotationY), 0, 0, 1, 0, 0, Math.sin(rotationY), 0, Math.cos(rotationY), 0, 0, 0, 0, 1];
 	var R_z = [Math.cos(rotationY), Math.sin(rotationY), 0, -Math.sin(rotationY), Math.cos(rotationY), 0, 0, 0, 1];

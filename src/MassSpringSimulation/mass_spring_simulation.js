@@ -1,7 +1,3 @@
-//var massSpring;
-
-
-
 class MassSpring {
 
 	constructor(random, label) {
@@ -19,9 +15,8 @@ class MassSpring {
 		this.boundingBox.setSwap(false);
 		this.setMesh(document.getElementById('sphereee').text);
 		this.pointDrawer = new PointDrawer();
-
-		//this.lightView = new LightView(this.meshDrawer);
 	}
+
 	setMesh(objdef) {
 		this.mesh = new ObjMesh;
 		this.mesh.parse(objdef);
@@ -164,8 +159,7 @@ class MassSpring {
 			collide = true; //Control flag
 		}
 
-		var table_position_buffer = table.buffers.positionBuffer
-		table_position_buffer = table.buffers.positionBuffer
+
 		var table_bbox = table.mesh.getBoundingBox();
 
 
@@ -180,6 +174,8 @@ class MassSpring {
 
 			if (isBoundingBoxCenterInside(mesh_bbox, circle_bbox, 0)) { //True if the ball bounding box center is inside the circle
 				collide = false;
+
+				// check if audio is playing
 				if (!isPlayingNet) { //Play net sound
 					net_audio.play(); // Play the audio
 					isPlayingNet = true; // Control flag
@@ -193,7 +189,7 @@ class MassSpring {
 			else {
 				if (collide) {
 					handleCircleCollisions(this.pos, 0.1, this.vel, circle_bbox, new Vec3(0, 0, 0));
-					// Controlla se l'audio non è in riproduzione
+					// check if audio is playing
 					if (!isPlayingMetal && !isPlayingNet) { //Play circle sound
 						//console.log("play")
 						metal_audio.play();  // Play the audio
@@ -213,8 +209,6 @@ class MassSpring {
 	}
 	resetScore() {
 		let scoreElement = document.getElementById('player1' + '-score');
-		//let currentScore = parseInt(scoreElement.innerText, 10);
-		///let newScore = currentScore + score;
 		scoreElement.innerText = 0;
 
 	}
@@ -268,7 +262,6 @@ class MassSpring {
 			this.stopSimulation();
 			btn.value = "Start Simulation";
 		} else {
-			//console.log(this.label)
 			this.startSimulation();
 			btn.value = "Stop Simulation";
 		}
