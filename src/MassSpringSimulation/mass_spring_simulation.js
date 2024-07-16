@@ -38,9 +38,10 @@ class MassSpring {
 				(Math.random() * 2 - 1)
 			];
 		}
+		var shift_ground = [0, -5, -5];
 		var maxSize = Math.max(size[0], size[1], size[2]);
 		var scale = 0.4 / maxSize;
-		this.mesh.shiftAndScale(shift, scale);
+		this.mesh.shiftAndScale(shift_ground, scale);
 		this.mesh.computeNormals();
 
 		this.reset();

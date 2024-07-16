@@ -112,7 +112,7 @@ class LightView {
 		var sy = Math.sin(this.rotY);
 		var cx = Math.cos(this.rotX);
 		var sx = Math.sin(this.rotX);
-		//massSpring.meshDrawer.setLightDir_old( -sy, cy*sx, cy*cx );
+		//massSpring.meshDrawer.setLightDir( -sy, cy*sx, cy*cx );
 		table.meshDrawer.setLightDir(-sy, -cy * cx, cy * sx);
 		circle.meshDrawer.setLightDir(-sy, cy * sx, cy * cx);
 		net.meshDrawer.setLightDir(-sy, -cy * cx, cy * sx);
