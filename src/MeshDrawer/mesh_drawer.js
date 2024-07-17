@@ -144,11 +144,11 @@ class MeshDrawer {
 		gl.vertexAttribPointer(this.texPosShader, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(this.texPosShader);
 
-		// assign texture to unit 0
+		// assign texture to unit 1
 		const textureSampler = gl.getUniformLocation(this.prog, "texture_sampler");
-		gl.activeTexture(gl.TEXTURE0);
+		gl.activeTexture(gl.TEXTURE1);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.uniform1i(textureSampler, 0);
+		gl.uniform1i(textureSampler, 1);
 
 	}
 
