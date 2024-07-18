@@ -170,7 +170,10 @@
                         table.meshDrawer.setTrans([trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                         table.meshDrawer.draw(mvp, MV, nrm, [trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14]]);
                     }
-                    net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+                    if(net){
+                        net.meshDrawer.draw(mvp,MV,nrm,[ trans.camToWorld[12], trans.camToWorld[13], trans.camToWorld[14] ])
+
+                    }
                     
                     if(lightView){
                         lightView.draw()
